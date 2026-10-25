@@ -1,4 +1,4 @@
-# EduHub v0.4
+# EduHub v0.6
 
 Przeglądarkowa biblioteka szkolnych, jednoplikowych aplikacji HTML. Hosting na GitHub Pages udostępnia wyłącznie samą powłokę PWA; zaimportowane HTML-e, postępy i klucz Groq są przechowywane lokalnie w urządzeniu użytkownika.
 
@@ -67,3 +67,16 @@ W EduHub wejdź w **🔑 Klucz Groq**, a następnie kliknij **Otwórz GroqCloud 
 W katalogu `Klasa → Język angielski` dostępny jest przycisk **🔑 Podłącz AI EduHub** przy starszych aplikacjach. Aktualizacja zachowuje identyfikator wpisu, metadane lokalne (poza zmianą na klasę 4 / Język angielski / Together 4 – Rozdział 1), wszystkie pytania i historię `localStorage`. Zastępuje ciągi przypominające klucze Groq w pliku niesekretnym znacznikiem i dodaje adapter `fetch` dla `https://api.groq.com/`, pobierający autoryzację wyłącznie ze współdzielonego klucza `localStorage['eduhub:groq-key']`. Daje też możliwość pobrania przetworzonego HTML. Migracja jest dobrowolna i powtórna nie zmienia kodu drugi raz.
 
 **Ograniczenie:** bez oryginalnego kodu danej aplikacji to migracja zgodności na poziomie żądań sieciowych, nie przebudowa jej silnika oceniania. Jeżeli starszy angielski nie posiadał w ogóle oceny AI lub blokuje jej wywołanie przed `fetch`, do pełnej integracji konieczna jest aktualizacja kodu źródłowego tej aplikacji. Importuj wyłącznie pliki, którym ufasz.
+
+## Wersjonowanie aplikacji (obowiązkowe od EduHub 0.6)
+
+Każdy plik powinien zawierać metadane w `<head>`:
+
+```html
+<meta name="eduhub:class" content="4">
+<meta name="eduhub:subject" content="Przyroda">
+<meta name="eduhub:name" content="Okiem badacza">
+<meta name="eduhub:version" content="1.8">
+```
+
+Wersja pojawia się na kafelku aplikacji. EduHub rozpoznaje ją najpierw z metadanych, a dla starszych plików z nazwy zawierającej np. `_v1.5_`. Numer jest wymagany przy dodawaniu i podmianie aplikacji. Przy wymianie porównujemy starą i nową wersję, ostrzegamy przed cofnięciem albo podmianą bez zwiększenia numeru. Wpisy starszych aplikacji pozostają w bibliotece, a brak wersji jest oznaczany do uzupełnienia. Numer aplikacji jest niezależny od wersji EduHub.

@@ -28,3 +28,6 @@ dialog{border:0;border-radius:20px;padding:0;max-width:min(95vw,650px);width:100
 @media(max-width:650px){.groq-guide{padding:14px}.groq-cloud-link{display:flex;width:100%}}
 
 .groq-easy-help{display:block;width:100%;text-decoration:none;text-align:center;line-height:1.4;margin:14px 0 18px;background:#1d7150;padding:16px}
+
+/* Wersja każdej aplikacji widoczna również na małym ekranie. */
+.version-tag{display:inline-block;width:max-content;margin-top:7px;padding:5px 9px;border-radius:8px;background:#e3f3e8;color:#1d6a47;font-size:.8rem;font-weight:850}.version-tag.missing{background:#fff0d6;color:#825000}
