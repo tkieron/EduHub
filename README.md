@@ -1,4 +1,4 @@
-# EduHub v0.6
+# EduHub v0.7
 
 Przeglądarkowa biblioteka szkolnych, jednoplikowych aplikacji HTML. Hosting na GitHub Pages udostępnia wyłącznie samą powłokę PWA; zaimportowane HTML-e, postępy i klucz Groq są przechowywane lokalnie w urządzeniu użytkownika.
 
@@ -80,3 +80,20 @@ Każdy plik powinien zawierać metadane w `<head>`:
 ```
 
 Wersja pojawia się na kafelku aplikacji. EduHub rozpoznaje ją najpierw z metadanych, a dla starszych plików z nazwy zawierającej np. `_v1.5_`. Numer jest wymagany przy dodawaniu i podmianie aplikacji. Przy wymianie porównujemy starą i nową wersję, ostrzegamy przed cofnięciem albo podmianą bez zwiększenia numeru. Wpisy starszych aplikacji pozostają w bibliotece, a brak wersji jest oznaczany do uzupełnienia. Numer aplikacji jest niezależny od wersji EduHub.
+
+
+## EduHub v0.7 — publiczny katalog wersji
+
+Od v0.7 każdy użytkownik widzi publiczne aplikacje w zakładce **📚 Katalog aplikacji**. EduHub na starcie odpytuje `/catalog/catalog.json` przez HTTPS bez cache, a potem wyświetla nowości i dostępne aktualizacje. Pobrane aplikacje pozostają w IndexedDB i działają offline. Użytkownik decyduje, kiedy zainstalować aktualizację, aby nie przerwać aktualnego testu.
+
+**Publikowanie nowego wydania**:
+
+1. Nadaj wersję w `<meta name="eduhub:version" content="1.9">` i pozostaw `eduhub:class`, `eduhub:subject`, `eduhub:name`.
+2. Upewnij się, że HTML nie zawiera kluczy ani danych prywatnych. Wszystko w katalogu jest publiczne.
+3. Umieść samodzielny HTML pod `catalog/apps/<stale-id>/<wersja>/index.html`. Nie nadpisuj poprzedniej wersji.
+4. Zmień `version`, `html`, `sha256`, `sizeBytes` i ewentualnie opis w `catalog/catalog.json`.
+5. Wgraj zmiany na `main`. GitHub Pages publikuje je jako pliki statyczne.
+
+Stałe `id` w JSON identyfikuje aplikację między wydaniami. EduHub dopasowuje także ręcznie wcześniej zainstalowane pliki po klasie, przedmiocie i nazwie. Przed instalacją porównuje SHA-256, wersję i metadane. Przy aktualizacji zachowuje lokalny identyfikator i odkłada poprzedni HTML do możliwości powrotu. Postępy zapisane przez aplikację w localStorage pozostają nienaruszone.
+
+**Bezpieczeństwo**: instaluj tylko zaufany, publicznie audytowalny kod. Zaimportowane aplikacje uruchamiają się na tej samej domenie i mają techniczny dostęp do wspólnego klucza Groq; jest to kompromis projektu bez backendu. SHA-256 chroni przed przypadkową niezgodnością pliku z manifestem, ale nie gwarantuje uczciwości autora katalogu. 

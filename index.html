@@ -13,9 +13,10 @@
 <body>
   <header class="hero">
     <div class="brand"><div class="brand-symbol">✳</div><div><div class="eyebrow">Twoja biblioteka edukacyjna</div><h1>EduHub</h1></div></div>
-    <p>Jedno miejsce na szkolne misje. Wybierz klasę i przedmiot, a aplikacje uruchamiaj także offline.</p>
+    <p>Wybierz aplikację z naszego katalogu. Pobierz ją jednym kliknięciem i ucz się także offline.</p>
     <div class="hero-actions">
-      <button class="btn btn-light" id="importBtn">＋ Dodaj aplikację HTML</button>
+      <button class="btn btn-light" id="catalogBtn">📚 Katalog aplikacji <span id="catalogIndicator" aria-live="polite"></span></button>
+      <button class="btn btn-glass" id="importBtn">＋ Dodaj plik HTML</button>
       <button class="btn btn-glass" id="groqBtn">🔑 Klucz Groq <span id="groqIndicator" aria-hidden="true"></span></button>
       <a class="btn btn-glass" href="./groq-pomoc.html" style="text-decoration:none;text-align:center">❓ Jak włączyć AI?</a>
       <button class="btn btn-glass" id="diagBtn">🎙 Test mikrofonu</button>
@@ -30,9 +31,9 @@
     </div>
     <nav id="breadcrumbs" class="breadcrumbs" aria-label="Nawigacja po bibliotece" hidden></nav>
     <div id="appGrid" class="app-grid" aria-live="polite"></div>
-    <section class="info-section"><h2>Jak to działa?</h2><div class="steps"><div><b>1</b><span>Dodaj plik HTML</span></div><div><b>2</b><span>Wybierz przedmiot i aplikację</span></div><div><b>3</b><span>Ucz się, także offline*</span></div></div><p class="note">* Rozpoznawanie mowy i ocenianie odpowiedzi przez AI mogą wymagać internetu. Klucz Groq zapisujemy lokalnie na tym urządzeniu, bez wysyłania go do GitHub Pages.</p></section>
+    <section class="info-section"><h2>Jak to działa?</h2><div class="steps"><div><b>1</b><span>Otwórz katalog EduHub</span></div><div><b>2</b><span>Zainstaluj aplikację jednym kliknięciem</span></div><div><b>3</b><span>Ucz się offline i aktualizuj bez utraty wyników*</span></div></div><p class="note">* Rozpoznawanie mowy i ocenianie odpowiedzi przez AI mogą wymagać internetu. Klucz Groq zapisujemy lokalnie na tym urządzeniu, bez wysyłania go do GitHub Pages.</p></section>
   </main>
-  <footer><span>EduHub v0.6 · Bez backendu · Bez konta</span><button id="backupBtn" class="footer-link">Eksport kopii aplikacji</button><button id="restoreBtn" class="footer-link">Import kopii</button><input type="file" id="backupInput" accept="application/json,.json" hidden></footer>
+  <footer><span>EduHub v0.7 · Bez backendu · Bez konta</span><button id="backupBtn" class="footer-link">Eksport kopii aplikacji</button><button id="restoreBtn" class="footer-link">Import kopii</button><input type="file" id="backupInput" accept="application/json,.json" hidden></footer>
   <dialog id="dialog"><div class="dialog-content"><button class="close" id="closeDialog" aria-label="Zamknij">✕</button><h2 id="dialogTitle"></h2><div id="dialogBody"></div></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script src="./app.js" defer></script>

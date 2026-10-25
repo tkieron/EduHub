@@ -10,6 +10,8 @@
   const formatBytes=n=>n>1048576?(n/1048576).toFixed(2)+' MB':Math.max(1,Math.round(n/1024))+' KB';
   const shortDate=n=>new Date(n).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'});
   let currentApps=[],selectedGrade=null,selectedSubject=null,recognition=null,toastTimer=null;
+  let showCatalogView=false,publicCatalog=null,catalogIsLoading=false,catalogGrade='all',catalogSubject='all',catalogError='';
+  const CATALOG_URL='./catalog/catalog.json';
   const gradeLabel=g=>g==='Bez klasy'?'Bez klasy':/^\d+[a-z]?$/i.test(g)?'Klasa '+g:g;
   const tidy=v=>String(v??'').trim().replace(/\s+/g,' ').slice(0,80);
   const subjectName=v=>{const s=tidy(v);const look={przyroda:'Przyroda',matematyka:'Matematyka',angielski:'Język angielski','język angielski':'Język angielski',english:'Język angielski',ortografia:'Język polski',polski:'Język polski','język polski':'Język polski',historia:'Historia',geografia:'Geografia',biologia:'Biologia',informatyka:'Informatyka'};return look[s.toLocaleLowerCase('pl')]||s||'Inne';};
@@ -43,7 +45,7 @@
     node.append(navButton(gradeLabel(selectedGrade),()=>{selectedSubject=null;renderLibrary();},selectedSubject===null));
     if(selectedSubject!==null){node.append(el('span','crumb-divider','›'));node.append(navButton(selectedSubject,()=>{},true));}
   }
-  function renderLibrary(){const wrap=$('appGrid');wrap.replaceChildren();$('appCount').textContent=currentApps.length?currentApps.length+' aplikacji przechowywanych lokalnie.':'Pliki pozostają na tym urządzeniu.';
+  function renderLibrary(){if(showCatalogView){renderCatalog();return;}const wrap=$('appGrid');wrap.replaceChildren();$('appCount').textContent=currentApps.length?currentApps.length+' aplikacji przechowywanych lokalnie.':'Pliki pozostają na tym urządzeniu.';
     if(!currentApps.length){$('viewHeading').textContent='Moje aplikacje';$('breadcrumbs').hidden=true;const empty=el('div','empty');empty.append(el('div','empty-icon','📚'),el('h3','','Twoja biblioteka czeka'),el('p','','Dodaj szkolną aplikację HTML. Przypiszemy ją do klasy i przedmiotu.'));const b=el('button','btn btn-primary','Wybierz plik HTML');b.onclick=chooseFile;empty.append(b);wrap.append(empty);return;}
     const grades=activeGrades();if(selectedGrade!==null&&!grades.includes(selectedGrade)){selectedGrade=null;selectedSubject=null;}
     if(selectedGrade===null&&grades.length===1)selectedGrade=grades[0];
@@ -53,7 +55,7 @@
     if(selectedSubject===null){$('viewHeading').textContent=gradeLabel(selectedGrade)+' — przedmioty';for(const subject of subjects){const count=inGrade.filter(a=>normalizedApp(a).subject===subject).length;const b=el('button','app-card category-card');b.type='button';b.append(el('div','card-icon',iconFor(subject)),el('h3','app-name',subject),el('div','category-count',count+(count===1?' aplikacja':' aplikacje')));b.onclick=()=>{selectedSubject=subject;renderLibrary();};wrap.append(b);}renderBreadcrumbs(grades);return;}
     $('viewHeading').textContent=selectedSubject+' — '+gradeLabel(selectedGrade);for(const app of inGrade.filter(a=>normalizedApp(a).subject===selectedSubject))renderAppCard(wrap,app);renderBreadcrumbs(grades);
   }
-  function renderAppCard(container,app){const a=normalizedApp(app);const card=el('article','app-card');const top=el('div','card-top');const icon=el('div','card-icon',a.icon||iconFor(a.subject));const detail=el('div');detail.append(el('h3','app-name',a.name),el('div','app-meta',formatBytes(a.byteSize||new Blob([a.html]).size)+' · '+shortDate(a.updatedAt)),el('div',a.version?'version-tag':'version-tag missing',a.version?'Wersja v'+a.version:'⚠ Wersja do uzupełnienia'));top.append(icon,detail);const label=el('span','category-tag',gradeLabel(a.grade)+' · '+a.subject);const description=el('div','card-description','Zapisana lokalnie. Wyniki pozostaną na urządzeniu przy aktualizacji pliku.');const actions=el('div','card-actions');const launch=el('button','btn btn-primary btn-sm open-app','▶ Uruchom');launch.onclick=()=>launchApp(a.id);const update=el('button','icon-btn','↻');update.title='Aktualizuj plik HTML';update.setAttribute('aria-label','Aktualizuj '+a.name);update.onclick=()=>chooseReplacement(a);const edit=el('button','icon-btn','✎');edit.title='Zmień klasę, przedmiot lub nazwę';edit.setAttribute('aria-label','Edytuj '+a.name);edit.onclick=()=>editMetadata(a);const del=el('button','icon-btn','×');del.title='Usuń aplikację';del.setAttribute('aria-label','Usuń '+a.name);del.onclick=async()=>{if(!confirm('Usunąć „'+a.name+'” z biblioteki? Historia wyników nie będzie automatycznie usunięta.'))return;await removeApp(a.id);await refresh();toast('Usunięto aplikację.');};if(a.subject==='Język angielski'){const bridge=el('button','btn btn-outline btn-sm','🔑 Podłącz AI EduHub');bridge.title='Usuń stary klucz i podłącz wspólny Groq';bridge.onclick=()=>upgradeEnglish(a);actions.append(bridge);}actions.append(launch,update,edit,del);card.append(top,label,description,actions);container.append(card);}
+  function renderAppCard(container,app){const a=normalizedApp(app);const card=el('article','app-card');const top=el('div','card-top');const icon=el('div','card-icon',a.icon||iconFor(a.subject));const detail=el('div');detail.append(el('h3','app-name',a.name),el('div','app-meta',formatBytes(a.byteSize||new Blob([a.html]).size)+' · '+shortDate(a.updatedAt)),el('div',a.version?'version-tag':'version-tag missing',a.version?'Wersja v'+a.version:'⚠ Wersja do uzupełnienia'));top.append(icon,detail);const label=el('span','category-tag',gradeLabel(a.grade)+' · '+a.subject);const description=el('div','card-description','Zapisana lokalnie. Wyniki pozostaną na urządzeniu przy aktualizacji pliku.');const actions=el('div','card-actions');const launch=el('button','btn btn-primary btn-sm open-app','▶ Uruchom');launch.onclick=()=>launchApp(a.id);const update=el('button','icon-btn','↻');update.title='Aktualizuj plik HTML';update.setAttribute('aria-label','Aktualizuj '+a.name);update.onclick=()=>chooseReplacement(a);const edit=el('button','icon-btn','✎');edit.title='Zmień klasę, przedmiot lub nazwę';edit.setAttribute('aria-label','Edytuj '+a.name);edit.onclick=()=>editMetadata(a);const del=el('button','icon-btn','×');del.title='Usuń aplikację';del.setAttribute('aria-label','Usuń '+a.name);del.onclick=async()=>{if(!confirm('Usunąć „'+a.name+'” z biblioteki? Historia wyników nie będzie automatycznie usunięta.'))return;await removeApp(a.id);await refresh();toast('Usunięto aplikację.');};if(a.subject==='Język angielski'&&/gsk_[A-Za-z0-9_-]{18,}/.test(a.html)){const bridge=el('button','btn btn-outline btn-sm','🔑 Podłącz AI EduHub');bridge.title='Usuń stary klucz i podłącz wspólny Groq';bridge.onclick=()=>upgradeEnglish(a);actions.append(bridge);}if(publicCatalog){const match=publicCatalog.apps.find(e=>installedFor(e)?.id===a.id);if(match&&compareAppVersions(match.version,a.version)>0){const remoteUpdate=el('button','btn btn-outline btn-sm','⬇ Aktualizuj do v'+match.version);remoteUpdate.onclick=()=>installFromCatalog(match);actions.prepend(remoteUpdate);const info=el('div','update-available','Dostępna nowa wersja v'+match.version+'. Twoje wyniki zostaną zachowane.');description.append(info);}}actions.append(launch,update,edit,del);if(a.previousRelease){const rollback=el('button','btn btn-outline btn-sm','↩ Poprzednia wersja');rollback.onclick=()=>rollbackApp(a);actions.append(rollback);}card.append(top,label,description,actions);container.append(card);}
   // Aktualizacja starszej aplikacji angielskiego bez dostępu do jej pierwotnego projektu.
   // Zmienia tylko metadane i sposób autoryzacji zapytań do Groq, nie dotyka pytań ani localStorage aplikacji.
   function migrateLegacyEnglish(html){
@@ -110,7 +112,7 @@
   function field(container,id,label,value,placeholder){const row=el('div','field');const lab=el('label','',label);lab.htmlFor=id;const input=el('input');input.id=id;input.value=value;input.placeholder=placeholder||'';input.maxLength=80;row.append(lab,input);container.append(row);return input;}
   function metadataEditor(values,title,submit,sourceNote){const wrap=el('div');if(sourceNote)wrap.append(el('p','hint',sourceNote));const grade=field(wrap,'editGrade','Klasa',values.grade==='Bez klasy'?'':values.grade,'np. 4');const subject=field(wrap,'editSubject','Przedmiot',values.subject==='Inne'?'':values.subject,'np. Przyroda');const name=field(wrap,'editName','Nazwa aplikacji',values.name,'np. Okiem badacza');const version=field(wrap,'editVersion','Wersja aplikacji (obowiązkowa)',values.version||'','np. 1.6 lub 1.6.0');version.inputMode='decimal';const buttons=el('div','form-actions');const cancel=el('button','btn btn-outline','Anuluj');cancel.type='button';cancel.onclick=()=>$('dialog').close();const save=el('button','btn btn-primary','Zapisz');save.type='button';save.onclick=async()=>{const n=tidy(name.value),s=tidy(subject.value),v=normalizeVersion(version.value);if(!n||!s){toast('Podaj nazwę i przedmiot.');return;}if(!v){toast('Wersja jest obowiązkowa, np. 1.6 lub 1.6.0.');version.focus();return;}save.disabled=true;try{const accepted=await submit({name:n,subject:subjectName(s),grade:normGrade(grade.value),version:v,icon:iconFor(s)});if(accepted===false)return;$('dialog').close();await refresh();}catch(e){toast('Błąd zapisu: '+e.message);}finally{save.disabled=false;}};buttons.append(cancel,save);wrap.append(buttons);showDialog(title,wrap);name.focus();}
   async function importHtml(file,existing=null){try{const html=await readHtml(file);const metadata=parseMetadata(html,file.name);const before=existing?normalizedApp(existing):null;const props=before?{...before,...Object.fromEntries(['grade','subject','name'].filter(k=>metadata[k]!==((k==='grade')?'Bez klasy':(k==='subject'?'Inne':''))).map(k=>[k,metadata[k]])),version:metadata.version}:metadata;
-    metadataEditor(props,existing?'Aktualizacja aplikacji':'Dodaj aplikację',async input=>{if(existing&&before?.version){const oldParts=before.version.split('.').map(Number),newParts=input.version.split('.').map(Number);const cmp=[0,1,2].map(i=>(newParts[i]||0)-(oldParts[i]||0)).find(n=>n!==0)||0;if(cmp<0&&!confirm('Nowy plik ma starszą wersję (v'+input.version+') niż obecna (v'+before.version+'). Zastąpić mimo to?'))return false;if(cmp===0&&existing.html!==html&&!confirm('Plik różni się od obecnego, ale ma ten sam numer v'+input.version+'. Lepiej podnieść wersję. Zastąpić mimo to?'))return false;}const id=existing?.id||'a_'+crypto.randomUUID().replaceAll('-','').slice(0,24);const versionedHtml=html.replace(/<meta\s+[^>]*name=["']eduhub:version["'][^>]*>/gi,'').replace(/<head([^>]*)>/i,(_,attrs)=>'<head'+attrs+'>\n<meta name="eduhub:version" content="'+input.version+'">');const app={...existing,...input,id,html:versionedHtml,filename:file.name,byteSize:new Blob([versionedHtml]).size,createdAt:existing?.createdAt||Date.now(),updatedAt:Date.now()};await saveApp(app);selectedGrade=app.grade;selectedSubject=app.subject;toast(existing?'Zaktualizowano aplikację.':'Aplikacja dodana!');},'Odczytano informacje z metadanych, nazwy pliku lub tytułu. Numer wersji jest obowiązkowy.'+(before?' Obecnie: '+(before.version?'v'+before.version:'brak')+'. Nowy plik: '+(metadata.version?'v'+metadata.version:'brak wersji')+'.':''));
+    metadataEditor(props,existing?'Aktualizacja aplikacji':'Dodaj aplikację',async input=>{if(existing&&before?.version){const oldParts=before.version.split('.').map(Number),newParts=input.version.split('.').map(Number);const cmp=[0,1,2].map(i=>(newParts[i]||0)-(oldParts[i]||0)).find(n=>n!==0)||0;if(cmp<0&&!confirm('Nowy plik ma starszą wersję (v'+input.version+') niż obecna (v'+before.version+'). Zastąpić mimo to?'))return false;if(cmp===0&&existing.html!==html&&!confirm('Plik różni się od obecnego, ale ma ten sam numer v'+input.version+'. Lepiej podnieść wersję. Zastąpić mimo to?'))return false;}const id=existing?.id||'a_'+crypto.randomUUID().replaceAll('-','').slice(0,24);const versionedHtml=html.replace(/<meta\s+[^>]*name=["']eduhub:version["'][^>]*>/gi,'').replace(/<head([^>]*)>/i,(_,attrs)=>'<head'+attrs+'>\n<meta name="eduhub:version" content="'+input.version+'">');const previousRelease=existing?{html:existing.html,version:normalizeVersion(existing.version)||versionFromHtml(existing.html),filename:existing.filename,byteSize:existing.byteSize,updatedAt:existing.updatedAt}:null;const app={...existing,...input,id,html:versionedHtml,filename:file.name,byteSize:new Blob([versionedHtml]).size,createdAt:existing?.createdAt||Date.now(),updatedAt:Date.now(),previousRelease,catalogId:null,blockedAutoUpdateVersion:null};await saveApp(app);selectedGrade=app.grade;selectedSubject=app.subject;toast(existing?'Zaktualizowano aplikację.':'Aplikacja dodana!');},'Odczytano informacje z metadanych, nazwy pliku lub tytułu. Numer wersji jest obowiązkowy.'+(before?' Obecnie: '+(before.version?'v'+before.version:'brak')+'. Nowy plik: '+(metadata.version?'v'+metadata.version:'brak wersji')+'.':''));
   }catch(e){toast('Błąd importu: '+e.message);}}
   function chooseReplacement(app){const input=document.createElement('input');input.type='file';input.accept='.html,.htm,text/html';input.onchange=()=>{if(input.files?.[0])importHtml(input.files[0],app);};input.click();}
   function editMetadata(app){metadataEditor(normalizedApp(app),'Edytuj informacje o aplikacji',async m=>{await saveApp({...app,...m,updatedAt:Date.now()});selectedGrade=m.grade;selectedSubject=m.subject;toast('Zapisano kategorię i nazwę.');});}
@@ -148,12 +150,98 @@
     stop.onclick=()=>{if(recognition)recognition.stop();};
     showDialog('🎙 Test mikrofonu i dyktowania',wrap);updatePerm();
   }
+
+  // PUBLIC CATALOG. Repo publiczne, importowane pliki przechowywane wyłącznie w IndexedDB.
+  function compareAppVersions(a,b){const ap=String(a||'').split('.').map(Number),bp=String(b||'').split('.').map(Number);for(let i=0;i<3;i++){if((ap[i]||0)!==(bp[i]||0))return (ap[i]||0)-(bp[i]||0);}return 0;}
+  function validateCatalog(value){
+    if(value?.schemaVersion!==1||!Array.isArray(value.apps)||value.apps.length>200)throw new Error('Nieznany format katalogu.');
+    const seen=new Set();
+    for(const e of value.apps){
+      if(!e||!/^[-a-z0-9]{3,80}$/.test(e.id)||!normalizeVersion(e.version)||typeof e.name!=='string'||!e.name.trim()||typeof e.grade!=='string'||typeof e.subject!=='string'||typeof e.description!=='string'||!/^catalog\/apps\/[a-z0-9-]+\/[0-9]+\.[0-9]+(?:\.[0-9]+)?\/index\.html$/.test(e.html)||!e.html.includes('/'+e.id+'/'+e.version+'/')||!/^[a-f0-9]{64}$/.test(e.sha256)||seen.has(e.id))throw new Error('Nieprawidłowy wpis w katalogu.');
+      seen.add(e.id);
+    }
+    return value;
+  }
+  function installedFor(entry){
+    const byId=currentApps.find(a=>a.catalogId===entry.id);if(byId)return byId;
+    // Starsze pliki importowane ręcznie mogą nie mieć katalogowego ID.
+    const matches=currentApps.filter(a=>{const n=normalizedApp(a),meta=parseMetadata(a.html,a.filename||'app.html');return n.grade===normGrade(entry.grade)&&n.subject===subjectName(entry.subject)&&(n.name.toLocaleLowerCase('pl')===tidy(entry.name).toLocaleLowerCase('pl')||meta.name.toLocaleLowerCase('pl')===tidy(entry.name).toLocaleLowerCase('pl'));});
+    return matches.length===1?matches[0]:null;
+  }
+  function describeCatalog(){if(!publicCatalog)return;let newCount=0,up=0;for(const e of publicCatalog.apps){const installed=installedFor(e);if(!installed)newCount++;else if(compareAppVersions(e.version,normalizedApp(installed).version)>0)up++;}const indicator=$('catalogIndicator');indicator.textContent=up?String(up)+' ↑':newCount?String(newCount):'';indicator.title=up?up+' aktualizacji':newCount+' nowych aplikacji';}
+  async function fetchCatalog({quiet=false}={}){
+    if(catalogIsLoading)return;
+    if(!navigator.onLine){catalogError='Brak internetu. Twoje zainstalowane aplikacje nadal działają offline.';if(showCatalogView)renderCatalog();return;}
+    catalogIsLoading=true;catalogError='';if(showCatalogView)renderCatalog();
+    try{const resp=await fetch(new URL(CATALOG_URL,scopeUrl).href+'?t='+Date.now(),{cache:'no-store'});if(!resp.ok)throw new Error('Serwer odpowiedział '+resp.status);const data=validateCatalog(await resp.json());publicCatalog=data;describeCatalog();if(showCatalogView)renderCatalog();else renderLibrary();if(!quiet)toast('Katalog jest aktualny.');}
+    catch(err){catalogError='Nie udało się odczytać katalogu: '+err.message;if(showCatalogView)renderCatalog();if(!quiet)toast(catalogError);}
+    finally{catalogIsLoading=false;if(showCatalogView)renderCatalog();}
+  }
+  function catalogToggle(open){showCatalogView=open;if(open&&!publicCatalog&&!catalogIsLoading)fetchCatalog({quiet:true});renderLibrary();}
+  function renderCatalog(){
+    const node=$('appGrid');node.replaceChildren();$('viewHeading').textContent='📚 Katalog aplikacji';$('appCount').textContent='Pobierz nową aplikację lub zaktualizuj już zainstalowaną.';
+    const crumbs=$('breadcrumbs');crumbs.hidden=false;crumbs.replaceChildren();const back=el('button','crumb','← Moja biblioteka');back.onclick=()=>catalogToggle(false);crumbs.append(back);
+    const info=el('div','catalog-lead');info.append(el('strong','','Wszystkie aplikacje są bezpłatne i publiczne.'),el('p','','Po pobraniu zapisujemy je tylko na Twoim urządzeniu. Wyniki i klucz Groq nie trafiają do GitHuba.'));
+    const refresh=el('button','btn btn-outline btn-sm','↻ Sprawdź nowości');refresh.disabled=catalogIsLoading;refresh.onclick=()=>fetchCatalog();info.append(refresh);node.append(info);
+    if(catalogError)node.append(el('div','update-available',catalogError));
+    if(catalogIsLoading&&!publicCatalog){node.append(el('div','empty','Sprawdzam nowe aplikacje…'));return;}
+    if(!publicCatalog){node.append(el('div','empty','Katalog niedostępny. Sprawdź internet i spróbuj ponownie.'));return;}
+    const grades=[...new Set(publicCatalog.apps.map(e=>normGrade(e.grade)))].sort((a,b)=>a.localeCompare(b,'pl',{numeric:true}));
+    if(catalogGrade!=='all'&&!grades.includes(catalogGrade))catalogGrade='all';
+    const availableSubjects=[...new Set(publicCatalog.apps.filter(e=>catalogGrade==='all'||normGrade(e.grade)===catalogGrade).map(e=>subjectName(e.subject)))].sort((a,b)=>a.localeCompare(b,'pl'));
+    if(catalogSubject!=='all'&&!availableSubjects.includes(catalogSubject))catalogSubject='all';
+    const toolbar=el('div','catalog-toolbar');
+    function selectFilter(label,allText,values,current,change){const sel=el('select');sel.setAttribute('aria-label',label);for(const [value,text] of [['all',allText],...values.map(v=>[v,v])]){const option=el('option','',text);option.value=value;option.selected=value===current;sel.append(option);}sel.onchange=()=>change(sel.value);toolbar.append(sel);}
+    if(grades.length>1)selectFilter('Klasa','Wszystkie klasy',grades,catalogGrade,v=>{catalogGrade=v;catalogSubject='all';renderCatalog();});
+    if(availableSubjects.length>1)selectFilter('Przedmiot','Wszystkie przedmioty',availableSubjects,catalogSubject,v=>{catalogSubject=v;renderCatalog();});
+    node.append(toolbar);
+    const visible=publicCatalog.apps.filter(e=>(catalogGrade==='all'||normGrade(e.grade)===catalogGrade)&&(catalogSubject==='all'||subjectName(e.subject)===catalogSubject));
+    for(const entry of visible){
+      const installed=installedFor(entry),installedV=installed?normalizedApp(installed).version:null;
+      const difference=installed?compareAppVersions(entry.version,installedV):1;
+      const card=el('article','app-card catalog-card');const top=el('div','card-top');const detail=el('div');detail.append(el('h3','app-name',entry.name),el('div','version-tag','v'+entry.version));top.append(el('div','card-icon',entry.icon||iconFor(entry.subject)),detail);
+      card.append(top,el('div','category-tag',gradeLabel(normGrade(entry.grade))+' · '+subjectName(entry.subject)),el('div','catalog-desc',entry.description));
+      const status=el('div','catalog-status'+(installed&&difference>0?' update':''),installed?(difference>0?'Nowa wersja: v'+installedV+' → v'+entry.version:difference===0?'Już zainstalowana v'+installedV:'Masz nowszą wersję v'+installedV):'Nie jest jeszcze zainstalowana');card.append(status);
+      const actions=el('div','card-actions');const button=el('button','btn '+(installed&&difference<=0?'btn-outline':'btn-primary')+' btn-sm',!installed?'⬇ Zainstaluj':difference>0?'⬇ Aktualizuj': '▶ Otwórz');
+      if(installed&&difference<=0)button.onclick=()=>launchApp(installed.id);else button.onclick=()=>installFromCatalog(entry,button);
+      actions.append(button);card.append(actions);node.append(card);
+    }
+  }
+  async function installFromCatalog(entry,button=null){
+    if(button)button.disabled=true;
+    try{
+      if(!publicCatalog?.apps.some(e=>e.id===entry.id&&e.version===entry.version&&e.sha256===entry.sha256))throw new Error('Nieznana pozycja katalogu.');
+      const existing=installedFor(entry);if(existing&&compareAppVersions(entry.version,normalizedApp(existing).version)<=0){toast('Ta wersja jest już zainstalowana.');return;}
+      const url=new URL(entry.html,scopeUrl);if(url.origin!==scopeUrl.origin||!url.pathname.startsWith(new URL('./catalog/apps/',scopeUrl).pathname))throw new Error('Niebezpieczna ścieżka aplikacji.');
+      const resp=await fetch(url.href+'?v='+encodeURIComponent(entry.version),{cache:'no-store'});if(!resp.ok)throw new Error('Nie udało się pobrać pliku (HTTP '+resp.status+').');
+      const bytes=await resp.arrayBuffer();if(bytes.byteLength>MAX_BYTES)throw new Error('Plik przekracza 20 MB.');
+      const digest=await crypto.subtle.digest('SHA-256',bytes),actual=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+      if(actual!==entry.sha256)throw new Error('Plik jest inny niż w katalogu (SHA-256). Nie instaluję go.');
+      const html=new TextDecoder('utf-8',{fatal:true}).decode(bytes);if(/gsk_[A-Za-z0-9_-]{18,}/.test(html))throw new Error('Plik zawiera zaszyty klucz Groq. Zablokowano instalację.');
+      const metadata=parseMetadata(html,url.pathname.split('/').pop());
+      if(metadata.version!==entry.version||normGrade(metadata.grade)!==normGrade(entry.grade)||subjectName(metadata.subject)!==subjectName(entry.subject)||metadata.name!==entry.name)throw new Error('Metadane pliku nie zgadzają się z katalogiem.');
+      const previousRelease=existing?{html:existing.html,version:normalizeVersion(existing.version)||versionFromHtml(existing.html),filename:existing.filename,byteSize:existing.byteSize,updatedAt:existing.updatedAt}:null;
+      const id=existing?.id||'a_'+crypto.randomUUID().replaceAll('-','').slice(0,24);
+      const app={...existing,id,catalogId:entry.id,grade:existing?.grade||normGrade(entry.grade),subject:existing?.subject||subjectName(entry.subject),name:existing?.name||entry.name,icon:existing?.icon||entry.icon||iconFor(entry.subject),version:entry.version,html,filename:entry.html.split('/').slice(-2).join('-'),byteSize:bytes.byteLength,createdAt:existing?.createdAt||Date.now(),updatedAt:Date.now(),previousRelease,blockedAutoUpdateVersion:null};
+      await saveApp(app);await refresh();describeCatalog();if(showCatalogView)renderCatalog();toast(existing?'Zaktualizowano '+entry.name+' do v'+entry.version+'.':'Zainstalowano '+entry.name+' v'+entry.version+'.');
+    }catch(err){toast('Instalacja nieudana: '+err.message);}
+    finally{if(button)button.disabled=false;}
+  }
+  async function rollbackApp(app){
+    if(!app.previousRelease)return;
+    const old=app.previousRelease;if(!confirm('Przywrócić wersję v'+(old.version||'?')+' aplikacji „'+app.name+'”? Wyniki zostaną zachowane.'))return;
+    const newer={html:app.html,version:app.version,filename:app.filename,byteSize:app.byteSize,updatedAt:app.updatedAt};
+    const restored={...app,html:old.html,version:old.version,filename:old.filename,byteSize:old.byteSize||new Blob([old.html]).size,updatedAt:Date.now(),previousRelease:newer,blockedAutoUpdateVersion:app.version};
+    await saveApp(restored);await refresh();describeCatalog();toast('Przywrócono wersję v'+(old.version||'?')+'.');
+  }
+
   async function exportBackup(){try{const apps=await listApps();if(!apps.length){toast('Nie ma aplikacji do eksportu.');return;}if(!confirm('Eksport zawiera pełne pliki HTML, które mogą mieć starsze wbudowane klucze API. Wspólny klucz Groq z EduHub NIE jest eksportowany. Kontynuować?'))return;const data={type:'eduhub-backup',version:2,exportedAt:new Date().toISOString(),apps};const url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));const a=el('a');a.href=url;a.download='eduhub-aplikacje-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2500);toast('Wyeksportowano aplikacje.');}catch(e){toast('Błąd eksportu: '+e.message);}}
   async function restoreBackup(file){try{if(file.size>80*1024*1024)throw new Error('Kopia jest zbyt duża.');const data=JSON.parse(await file.text());if(data.type!=='eduhub-backup'||!Array.isArray(data.apps))throw new Error('Nieprawidłowa kopia EduHub.');if(!confirm('Przywrócić '+data.apps.length+' aplikacji? Aplikacje o tych samych identyfikatorach zostaną zaktualizowane.'))return;let count=0;for(const original of data.apps){if(!/^a_[a-f0-9]{24}$/.test(original.id)||typeof original.html!=='string'||original.html.length>MAX_BYTES||typeof original.name!=='string')continue;const meta=parseMetadata(original.html,original.filename||original.name+'.html');const a={...original,name:tidy(original.name),grade:normGrade(original.grade||meta.grade),subject:subjectName(original.subject||meta.subject),icon:original.icon||iconFor(original.subject||meta.subject),version:normalizeVersion(original.version)||meta.version};await saveApp(a);count++;}selectedGrade=null;selectedSubject=null;await refresh();toast('Przywrócono '+count+' aplikacji.');}catch(e){toast('Błąd importu: '+e.message);}}
+  $('catalogBtn').onclick=()=>catalogToggle(!showCatalogView);
   $('importBtn').onclick=chooseFile;$('fileInput').onchange=e=>{if(e.target.files?.[0])importHtml(e.target.files[0]);e.target.value='';};$('groqBtn').onclick=showGroqSettings;$('diagBtn').onclick=showDiagnostics;
   $('closeDialog').onclick=()=>{$('dialog').close();if(recognition){recognition.abort();recognition=null;}};
   $('dialog').addEventListener('close',()=>{if(recognition){recognition.abort();recognition=null;}});
   $('backupBtn').onclick=exportBackup;$('restoreBtn').onclick=()=>$('backupInput').click();$('backupInput').onchange=e=>{if(e.target.files?.[0])restoreBackup(e.target.files[0]);e.target.value='';};
-  window.addEventListener('online',setStatus);window.addEventListener('offline',setStatus);setStatus();refreshGroqIndicator();initServiceWorker().then(refresh);
+  window.addEventListener('online',()=>{setStatus();fetchCatalog({quiet:true});});window.addEventListener('offline',setStatus);setStatus();refreshGroqIndicator();initServiceWorker().then(async()=>{await refresh();await fetchCatalog({quiet:true});});
   if(location.hash==='#groq'){history.replaceState(null,'',location.pathname+location.search);showGroqSettings();}
 })();

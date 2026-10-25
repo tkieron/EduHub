@@ -31,3 +31,20 @@ dialog{border:0;border-radius:20px;padding:0;max-width:min(95vw,650px);width:100
 
 /* Wersja każdej aplikacji widoczna również na małym ekranie. */
 .version-tag{display:inline-block;width:max-content;margin-top:7px;padding:5px 9px;border-radius:8px;background:#e3f3e8;color:#1d6a47;font-size:.8rem;font-weight:850}.version-tag.missing{background:#fff0d6;color:#825000}
+
+/* EduHub 0.7 – publiczny katalog i powiadomienia o aktualizacjach. */
+.catalog-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.catalog-lead{grid-column:1/-1;background:#eaf4ec;border:1px solid #d4e7d7;color:#335c44;padding:16px 18px;border-radius:18px;line-height:1.5}
+.catalog-lead p{margin:5px 0;font-size:.9rem}
+.catalog-lead .btn{margin-top:10px}
+.catalog-card{min-height:235px}
+.catalog-card .catalog-desc{color:#557362;font-size:.89rem;line-height:1.5;flex:1}
+.catalog-card .catalog-status{font-size:.8rem;font-weight:800;color:#205f45;background:#e6f6ea;width:max-content;max-width:100%;padding:7px 10px;border-radius:12px}
+.catalog-card .catalog-status.update{color:#875312;background:#fff0ce}
+.catalog-card .card-actions .btn{flex:1}
+#catalogIndicator:not(:empty){display:inline-grid;place-items:center;background:#dcf8d8;color:#145a3b;border-radius:20px;min-width:26px;height:26px;margin-left:3px;padding:0 7px;font-size:.8rem;font-weight:900}
+.catalog-back{display:inline-flex;align-items:center;gap:6px}
+.catalog-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0}
+.catalog-toolbar select{min-height:42px;border:1px solid #bdd7c3;border-radius:11px;padding:9px 12px;background:white;color:#204b35}
+.update-available{border-left:4px solid #dda343;background:#fff8e8;border-radius:12px;padding:13px;color:#79561b;margin-top:8px;font-size:.87rem;line-height:1.4}
+@media(max-width:650px){.catalog-toolbar select,.catalog-toolbar .btn{flex:1 1 100%}}
