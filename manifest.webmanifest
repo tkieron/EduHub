@@ -1,0 +1,15 @@
+{
+  "name": "EduHub – aplikacje edukacyjne",
+  "short_name": "EduHub",
+  "description": "Prywatna biblioteka szkolnych aplikacji HTML, działających również offline.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f3",
+  "theme_color": "#14593e",
+  "lang": "pl",
+  "icons": [
+    {"src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
