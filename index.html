@@ -4,28 +4,35 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14593e">
-  <meta name="description" content="EduHub – prywatna biblioteka edukacyjnych aplikacji HTML, działających także offline.">
+  <meta name="description" content="EduHub — prywatna biblioteka aplikacji edukacyjnych, uporządkowanych według klas i przedmiotów.">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
   <link rel="stylesheet" href="./style.css">
-  <title>EduHub – moje aplikacje edukacyjne</title>
+  <title>EduHub — moje aplikacje edukacyjne</title>
 </head>
 <body>
   <header class="hero">
     <div class="brand"><div class="brand-symbol">✳</div><div><div class="eyebrow">Twoja biblioteka edukacyjna</div><h1>EduHub</h1></div></div>
-    <p>Wszystkie szkolne misje w jednym miejscu. Dodaj plik HTML, otwórz aplikację i korzystaj z niej bez połączenia z internetem.</p>
-    <div class="hero-actions"><button class="btn btn-light" id="importBtn">＋ Dodaj aplikację HTML</button><button class="btn btn-glass" id="diagBtn">🎙 Test mikrofonu</button></div>
+    <p>Jedno miejsce na szkolne misje. Wybierz klasę i przedmiot, a aplikacje uruchamiaj także offline.</p>
+    <div class="hero-actions">
+      <button class="btn btn-light" id="importBtn">＋ Dodaj aplikację HTML</button>
+      <button class="btn btn-glass" id="groqBtn">🔑 Klucz Groq <span id="groqIndicator" aria-hidden="true"></span></button>
+      <button class="btn btn-glass" id="diagBtn">🎙 Test mikrofonu</button>
+    </div>
     <input type="file" id="fileInput" accept=".html,.htm,text/html" hidden>
   </header>
-
   <main>
     <section class="message warning" id="setupNotice" hidden></section>
-    <div class="section-heading"><div><h2>Moje aplikacje</h2><p id="appCount">Twoje pliki są przechowywane tylko na tym urządzeniu.</p></div><span id="netStatus" class="status" aria-live="polite"></span></div>
-    <div id="appGrid" class="app-grid" aria-live="polite"><div class="empty"><div class="empty-icon">📚</div><h3>Twoja biblioteka czeka</h3><p>Dodaj „Misję Przyroda”, angielski lub matematykę jako gotowy plik HTML.</p><button class="btn btn-primary" id="emptyImportBtn">Wybierz plik HTML</button></div></div>
-    <section class="info-section"><h2>Jak to działa?</h2><div class="steps"><div><b>1</b><span>Dodaj samodzielny plik HTML</span></div><div><b>2</b><span>Uruchom go z EduHubu</span></div><div><b>3</b><span>Korzystaj offline i dyktuj odpowiedzi*</span></div></div><p class="note">* Dostęp do mikrofonu i rozpoznawanie głosu zależą od przeglądarki i mogą wymagać internetu. Pliki pozostają na Twoim urządzeniu, ale usługi AI działają przez sieć.</p></section>
+    <div class="section-heading">
+      <div><h2 id="viewHeading">Moje aplikacje</h2><p id="appCount">Twoje pliki są przechowywane tylko na tym urządzeniu.</p></div>
+      <span id="netStatus" class="status" aria-live="polite"></span>
+    </div>
+    <nav id="breadcrumbs" class="breadcrumbs" aria-label="Nawigacja po bibliotece" hidden></nav>
+    <div id="appGrid" class="app-grid" aria-live="polite"></div>
+    <section class="info-section"><h2>Jak to działa?</h2><div class="steps"><div><b>1</b><span>Dodaj plik HTML</span></div><div><b>2</b><span>Wybierz przedmiot i aplikację</span></div><div><b>3</b><span>Ucz się, także offline*</span></div></div><p class="note">* Rozpoznawanie mowy i ocenianie odpowiedzi przez AI mogą wymagać internetu. Klucz Groq zapisujemy lokalnie na tym urządzeniu, bez wysyłania go do GitHub Pages.</p></section>
   </main>
-  <footer><span>EduHub v0.1 · Bez backendu · Bez konta</span><button id="backupBtn" class="footer-link">Eksport kopii aplikacji</button><button id="restoreBtn" class="footer-link">Import kopii</button><input type="file" id="backupInput" accept="application/json,.json" hidden></footer>
-  <dialog id="dialog"><div class="dialog-content"><button class="close" id="closeDialog" aria-label="Zamknij">✕</button><h2 id="dialogTitle">Test mikrofonu</h2><div id="dialogBody"></div></div></dialog>
+  <footer><span>EduHub v0.2 · Bez backendu · Bez konta</span><button id="backupBtn" class="footer-link">Eksport kopii aplikacji</button><button id="restoreBtn" class="footer-link">Import kopii</button><input type="file" id="backupInput" accept="application/json,.json" hidden></footer>
+  <dialog id="dialog"><div class="dialog-content"><button class="close" id="closeDialog" aria-label="Zamknij">✕</button><h2 id="dialogTitle"></h2><div id="dialogBody"></div></div></dialog>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script src="./app.js" defer></script>
 </body>
