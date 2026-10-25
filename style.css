@@ -26,3 +26,5 @@ dialog{border:0;border-radius:20px;padding:0;max-width:min(95vw,650px);width:100
 .groq-steps li{margin:0 0 8px;padding-left:2px}
 .groq-help-link{font-size:.86rem;color:#205f46;text-underline-offset:3px;display:inline-block;margin-top:3px}
 @media(max-width:650px){.groq-guide{padding:14px}.groq-cloud-link{display:flex;width:100%}}
+
+.groq-easy-help{display:block;width:100%;text-decoration:none;text-align:center;line-height:1.4;margin:14px 0 18px;background:#1d7150;padding:16px}

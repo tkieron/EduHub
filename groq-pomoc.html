@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14593e">
+  <meta name="description" content="Prosta instrukcja obrazkowa: jak włączyć sprawdzanie odpowiedzi przez AI w EduHub.">
+  <link rel="stylesheet" href="./style.css">
+  <title>Jak włączyć AI? — EduHub</title>
+  <style>
+    .guide-main{max-width:760px;margin:0 auto;padding:22px 18px 100px}
+    .guide-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .guide-back{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-weight:760;color:#176042;min-height:44px}
+    .guide-kicker{letter-spacing:.09em;font-weight:800;font-size:.78rem;color:#346d53;text-transform:uppercase}
+    .guide-title{font-size:clamp(1.75rem,6vw,2.55rem);line-height:1.15;margin:5px 0 9px;color:#183a2b}
+    .guide-lead{font-size:1.04rem;line-height:1.5;color:#526a5c;margin:0 0 18px}
+    .guide-controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}
+    .guide-controls a,.guide-controls button{flex:1 1 200px;text-align:center;text-decoration:none}
+    .guide-pane{border-radius:24px;border:1px solid #d6e6d8;background:white;box-shadow:0 10px 35px #14412d12;padding:20px;overflow:hidden}
+    .guide-progress{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.87rem;font-weight:800;color:#27704e}
+    .guide-dots{display:flex;gap:5px}.guide-dot{width:24px;height:7px;background:#dcece0;border-radius:99px}.guide-dot.active{background:#1c7952}
+    .guide-step-title{font-size:1.47rem;line-height:1.25;margin:16px 0 7px;color:#173b2a}
+    .guide-step-copy{font-size:1.04rem;line-height:1.55;margin:0 0 14px;color:#344d40}
+    .guide-step-copy strong{color:#116038}
+    .demo-label{font-size:.75rem;color:#6b786c;text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin:12px 0 8px}
+    .demo{background:#f8fbf8;border:1px solid #dce9de;border-radius:18px;overflow:hidden;min-height:242px;color:#263e35}
+    .demo-bar{height:34px;background:#e7eee9;display:flex;gap:6px;align-items:center;padding:0 12px;font-size:.69rem;color:#688071}
+    .demo-bar .dot{width:7px;height:7px;border-radius:50%;background:#b4c8b8}
+    .demo-page{padding:18px;display:flex;flex-direction:column;gap:10px;align-items:stretch}
+    .demo-logo{font-size:1.25rem;font-weight:860;letter-spacing:-.04em}
+    .demo-title{font-size:1.1rem;font-weight:830;margin:0 0 6px}
+    .demo-line{padding:13px 14px;background:#fff;border:1px solid #d5e1d7;border-radius:10px;font-size:.93rem;font-weight:650}
+    .demo-selected{box-shadow:0 0 0 4px #ffd47c;border-color:#c78c27!important;position:relative;z-index:2}
+    .demo-muted{color:#7b8b81;font-size:.85rem}
+    .demo-primary{background:#214e3d;color:#fff;border:0;border-radius:10px;padding:13px 16px;font-size:.91rem;font-weight:770}
+    .demo-secondary{border:1px solid #d7e1da;background:white;border-radius:10px;padding:12px 14px;font-size:.91rem;font-weight:750}
+    .demo-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.demo-keys{display:flex;gap:10px;min-height:212px}
+    .demo-nav{flex:0 0 104px;background:#eef4ef;padding:14px 10px;font-size:.75rem;line-height:1.8;border-radius:12px}
+    .demo-content{flex:1;padding:8px 0}.demo-menu-item{border-radius:8px;padding:4px 7px;margin:2px -3px;font-weight:750}
+    .demo-dialog{max-width:335px;margin:0 auto;background:white;border:1px solid #d8e4da;border-radius:15px;box-shadow:0 5px 18px #123e241c;padding:18px}
+    .demo-field{padding:13px;border:1px solid #b7cbbd;border-radius:10px;font-size:.95rem;background:#fff;font-weight:600;margin:9px 0 14px}
+    .demo-foot{display:flex;flex-direction:column;gap:9px;margin-top:18px}
+    .guide-note{background:#eaf5ee;padding:12px 14px;border-radius:12px;font-size:.87rem;line-height:1.5;color:#3d624f;margin-top:14px}
+    .guide-nav{display:flex;gap:10px;margin-top:20px}.guide-nav .btn{flex:1}
+    .guide-next{min-width:175px}.guide-prev{background:white;border:1px solid #d2e1d6;color:#2d6948}
+    .guide-small{font-size:.84rem;line-height:1.5;color:#5e7766;margin:16px 2px 0}
+    .guide-action{display:block;text-align:center;text-decoration:none;margin-top:14px}
+    @media(max-width:600px){.guide-pane{padding:16px}.demo-nav{flex-basis:85px;padding:11px 7px}.demo-keys{gap:8px}.demo-page{padding:13px}.guide-nav{flex-direction:column-reverse}.guide-nav .btn{width:100%}.guide-controls a,.guide-controls button{flex:1 1 100%}}
+  </style>
+</head>
+<body>
+  <main class="guide-main">
+    <div class="guide-head"><a class="guide-back" href="./#groq">← Wróć do EduHub</a></div>
+    <div class="guide-kicker">Prosta instrukcja dla rodzica</div>
+    <h1 class="guide-title">Jak włączyć sprawdzanie odpowiedzi przez AI?</h1>
+    <p class="guide-lead">Zrobimy to wspólnie w <strong>5 prostych krokach</strong>. Nie trzeba niczego instalować ani programować.</p>
+    <div class="guide-controls"><a class="btn btn-primary" href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer">↗ Otwórz Groq</a><button id="already" class="btn btn-outline" type="button">Mam już klucz</button></div>
+    <section class="guide-pane" aria-live="polite">
+      <div class="guide-progress"><span id="counter">Krok 1 z 5</span><div class="guide-dots" id="dots" aria-hidden="true"></div></div>
+      <h2 class="guide-step-title" id="stepTitle"></h2>
+      <p class="guide-step-copy" id="stepCopy"></p>
+      <div class="demo-label">Tak mniej więcej wygląda ekran · przykład</div>
+      <div class="demo" id="demo" aria-label="Przykładowy wygląd strony"></div>
+      <div class="guide-note" id="note"></div>
+      <div class="guide-nav"><button id="prev" type="button" class="btn guide-prev">← Wróć</button><button id="next" type="button" class="btn btn-primary guide-next">Dalej →</button></div>
+    </section>
+    <p class="guide-small">Rysunki pokazują, czego szukać na ekranie. Prawdziwa strona Groq może wyglądać nieco inaczej. Klucz jest jak hasło — nie wysyłaj go nikomu i nie wklejaj na przypadkowych stronach. Po zapisaniu w EduHub będzie dostępny dla importowanych aplikacji na tym urządzeniu.</p>
+  </main>
+  <script>
+    (()=>{'use strict';
+      const steps=[
+        {
+          title:'Wejdź na stronę Groq',
+          text:'Naciśnij na górze <strong>„Otwórz Groq”</strong>. Gdy pojawi się logowanie, wybierz np. <strong>„Continue with Google”</strong> i zaloguj się na swoje konto.',
+          demo:`<div class="demo-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i> console.groq.com</div><div class="demo-page" style="max-width:320px;margin:auto;text-align:center"><div class="demo-logo">GroqCloud</div><div class="demo-muted">Create Account or Login</div><div class="demo-line demo-selected">Continue with Google</div><div class="demo-line">Continue with GitHub</div><div class="demo-line">Continue with email</div></div>`,
+          note:'Jeśli nie masz konta, utworzysz je podczas logowania. Jeśli jesteś już zalogowana lub zalogowany, możesz od razu zobaczyć listę kluczy.'
+        },
+        {
+          title:'Znajdź przycisk tworzenia klucza',
+          text:'Na stronie <strong>„API Keys”</strong> odszukaj przycisk <strong>„Create API Key”</strong> (czyli „Utwórz klucz”) i go naciśnij.',
+          demo:`<div class="demo-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i> console.groq.com/keys</div><div class="demo-page"><div class="demo-keys"><div class="demo-nav"><div class="demo-logo" style="font-size:.95rem">Groq</div><div>Home</div><div class="demo-menu-item demo-selected">API Keys</div><div>Usage</div></div><div class="demo-content"><div class="demo-row" style="align-items:flex-start;flex-direction:column"><strong style="font-size:1.15rem">API Keys</strong><div class="demo-primary demo-selected">+ Create API Key</div></div><p class="demo-muted">Tutaj będą widoczne Twoje klucze</p></div></div></div>`,
+          note:'Jeżeli nie widzisz takiej zakładki, otwórz jeszcze raz przycisk „Otwórz Groq” na górze tej instrukcji — prowadzi prosto do kluczy.'
+        },
+        {
+          title:'Nazwij nowy klucz',
+          text:'W polu na nazwę wpisz po prostu <strong>EduHub</strong> i naciśnij przycisk utworzenia klucza. Nazwa jest tylko dla Ciebie.',
+          demo:`<div class="demo-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i> GroqCloud</div><div class="demo-page" style="background:#f1f5f2"><div class="demo-dialog"><div class="demo-title">Create API Key</div><div class="demo-muted">Name</div><div class="demo-field demo-selected">EduHub</div><div class="demo-primary demo-selected" style="text-align:center">Create / Submit</div></div></div>`,
+          note:'Nie musisz nic ustawiać w kodzie ani wybierać modelu AI. Wystarczy nazwa i zatwierdzenie.'
+        },
+        {
+          title:'Skopiuj klucz',
+          text:'Pojawi się długi ciąg znaków zaczynający się od <strong>gsk_</strong>. Naciśnij <strong>„Copy”</strong> („Kopiuj”). <strong>To ważne:</strong> klucz może być pokazany tylko raz.',
+          demo:`<div class="demo-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i> GroqCloud</div><div class="demo-page"><div class="demo-title">Your API Key</div><div class="demo-field" style="font-family:monospace">gsk_•••••••••••••••••••</div><div class="demo-primary demo-selected" style="text-align:center">▣ Copy</div><div class="demo-muted">To tylko przykład — nie jest to prawdziwy klucz</div></div>`,
+          note:'Nie wysyłaj klucza w wiadomości ani do mnie, ani nikomu innemu. Skopiowany klucz zostanie na chwilę w schowku telefonu.'
+        },
+        {
+          title:'Wklej klucz do EduHub',
+          text:'Wróć do <strong>EduHub</strong>, otwórz <strong>„Klucz Groq”</strong>, dotknij pola i wybierz <strong>„Wklej”</strong>. Naciśnij <strong>„Zapisz klucz”</strong>, a potem <strong>„Test połączenia”</strong>. Gotowe!',
+          demo:`<div class="demo-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i> EduHub</div><div class="demo-page"><div class="demo-title">🔑 Klucz Groq</div><div class="demo-muted">Tutaj wklej skopiowany klucz</div><div class="demo-field demo-selected">•••••••••••••••••</div><div class="demo-primary demo-selected" style="text-align:center">Zapisz klucz</div><div class="demo-secondary" style="text-align:center">Test połączenia</div></div>`,
+          note:'Po pozytywnym teście AI jest gotowe do sprawdzania opisowych odpowiedzi w zgodnych aplikacjach EduHub.'
+        }
+      ];
+      let index=0;const $=id=>document.getElementById(id);
+      function render(){const step=steps[index];$('counter').textContent='Krok '+(index+1)+' z '+steps.length;$('stepTitle').textContent=step.title;$('stepCopy').innerHTML=step.text;$('demo').innerHTML=step.demo;$('note').textContent=step.note;$('dots').replaceChildren(...steps.map((_,i)=>{const d=document.createElement('span');d.className='guide-dot'+(i===index?' active':'');return d;}));$('prev').hidden=index===0;$('next').textContent=index===steps.length-1?'Wróć do EduHub →':'Dalej →';}
+      $('next').onclick=()=>{if(index===steps.length-1){location.href='./#groq';return;}index++;render();};
+      $('prev').onclick=()=>{index=Math.max(0,index-1);render();};
+      $('already').onclick=()=>{index=4;render();document.querySelector('.guide-pane').scrollIntoView({behavior:'smooth',block:'start'});};
+      render();
+    })();
+  </script>
+</body>
+</html>

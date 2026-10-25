@@ -1,6 +1,6 @@
-/* EduHub v0.3: statyczna powłoka oraz lokalne aplikacje z IndexedDB */
-const CACHE='eduhub-shell-0.3';
-const SHELL=['./','./index.html','./style.css','./app.js','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
+/* EduHub v0.4: statyczna powłoka oraz lokalne aplikacje z IndexedDB */
+const CACHE='eduhub-shell-0.4';
+const SHELL=['./','./index.html','./style.css','./app.js','./groq-pomoc.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 const DB_NAME='eduhub-v1', DB_VERSION=1;
 function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('apps'))req.result.createObjectStore('apps',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
 async function getApp(id){const db=await openDb();try{return await new Promise((resolve,reject)=>{const req=db.transaction('apps','readonly').objectStore('apps').get(id);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}finally{db.close();}}
@@ -20,7 +20,7 @@ self.addEventListener('fetch',event=>{
    const html=/<head(?:\s[^>]*)?>/i.test(app.html)?app.html.replace(/<head(\s[^>]*)?>/i,m=>m+bridge):bridge+app.html;
    return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
   }catch(e){return new Response('Błąd lokalnej aplikacji: '+String(e),{status:500,headers:{'Content-Type':'text/plain; charset=utf-8'}});}})());return;}
- event.respondWith((async()=>{const isShell=['','index.html','app.js','style.css','sw.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png'].includes(relative);
+ event.respondWith((async()=>{const isShell=['','index.html','app.js','style.css','groq-pomoc.html','sw.js','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png'].includes(relative);
   if(isShell){const cached=await caches.match(req,{ignoreSearch:true});if(cached)return cached;}
   try{return await fetch(req);}catch(e){if(req.mode==='navigate')return(await caches.match(new URL('./index.html',scope).href))||Response.error();throw e;}
  })());

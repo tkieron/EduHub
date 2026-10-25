@@ -1,4 +1,4 @@
-# EduHub v0.3
+# EduHub v0.4
 
 Przeglądarkowa biblioteka szkolnych, jednoplikowych aplikacji HTML. Hosting na GitHub Pages udostępnia wyłącznie samą powłokę PWA; zaimportowane HTML-e, postępy i klucz Groq są przechowywane lokalnie w urządzeniu użytkownika.
 
@@ -55,3 +55,9 @@ W EduHub wejdź w **🔑 Klucz Groq**, a następnie kliknij **Otwórz GroqCloud 
 - Panel kluczy: https://console.groq.com/keys
 - Instrukcja dostawcy: https://console.groq.com/docs/quickstart
 - Klucz pozostaje w localStorage urządzenia; nigdy nie dodawaj go do publicznego repozytorium. Importowane aplikacje działają na tym samym originie i mogą uzyskać do niego dostęp.
+
+## Instrukcja dla rodziców (v0.4)
+
+- Strona [Jak włączyć AI?](groq-pomoc.html) prowadzi przez utworzenie i zapisanie własnego klucza w 5 obrazkowych krokach.
+- Kafle są ilustracjami, nie zrzutami prawdziwego interfejsu Groq. Dostęp do kluczy: https://console.groq.com/keys.
+- Po zakończeniu wróć do EduHub → Klucz Groq. Nie publikuj klucza.
