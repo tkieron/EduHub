@@ -17,3 +17,12 @@ dialog{border:0;border-radius:20px;padding:0;max-width:min(95vw,650px);width:100
 .card-description{flex:1}.category-tag{display:inline-block;align-self:flex-start;border-radius:99px;background:#eef6ed;color:#3a6c50;font-size:.78rem;font-weight:700;padding:5px 9px}
 .field{margin:12px 0}.field label{font-size:.86rem;font-weight:750;display:block;margin-bottom:6px}.field input,.field select{width:100%;padding:12px;border:1px solid #c7dccc;border-radius:12px;background:#fff;color:#1b392d}.field input:focus-visible{outline:3px solid #9cdb72;outline-offset:1px}.form-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.form-actions .btn{flex:1}.security-note{border-radius:12px;background:#fff5db;color:#71531a;padding:13px;font-size:.84rem;line-height:1.55}.success-note{border-radius:12px;background:#e1f5e7;color:#185838;padding:12px;font-size:.85rem}.hint{color:#657f6d;font-size:.81rem;line-height:1.5}.code-example{overflow-wrap:anywhere;display:block;background:#f2f6f2;padding:10px;border-radius:10px;font-size:.8rem}
 @media(max-width:650px){.breadcrumbs{gap:6px}.crumb{padding:8px}.form-actions .btn{flex:1 1 100%}}
+
+/* GroqCloud onboarding: link, instrukcja i przewijanie na telefonie */
+.groq-guide{background:#edf5ee;border:1px solid #cce2d2;border-radius:16px;padding:17px 18px;margin:16px 0 20px}
+.groq-guide h3{font-size:1rem;margin:0 0 12px;color:#194c38}
+.groq-cloud-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;max-width:100%;text-align:center}
+.groq-steps{margin:14px 0 10px;padding-left:22px;color:#395b47;line-height:1.48;font-size:.91rem}
+.groq-steps li{margin:0 0 8px;padding-left:2px}
+.groq-help-link{font-size:.86rem;color:#205f46;text-underline-offset:3px;display:inline-block;margin-top:3px}
+@media(max-width:650px){.groq-guide{padding:14px}.groq-cloud-link{display:flex;width:100%}}

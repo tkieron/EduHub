@@ -1,4 +1,4 @@
-# EduHub v0.2
+# EduHub v0.3
 
 Przeglądarkowa biblioteka szkolnych, jednoplikowych aplikacji HTML. Hosting na GitHub Pages udostępnia wyłącznie samą powłokę PWA; zaimportowane HTML-e, postępy i klucz Groq są przechowywane lokalnie w urządzeniu użytkownika.
 
@@ -47,3 +47,11 @@ Przycisk ↻ podmienia HTML przy zachowaniu identyfikatora aplikacji (a przez to
 - Appka może działać offline, ale dyktowanie w Chrome może wymagać usług sieciowych. W razie problemu użyj dyktowania Gboard.
 - W obecnym modelu importuj jednoplikowe, samodzielne aplikacje HTML; osobne względne zasoby nie są automatycznie importowane.
 - Wcześniejsze dane biblioteki z EduHub v0.1 są zachowywane (ta sama IndexedDB `eduhub-v1`).
+
+## GroqCloud – instrukcja utworzenia klucza
+
+W EduHub wejdź w **🔑 Klucz Groq**, a następnie kliknij **Otwórz GroqCloud – klucze API**. Zaloguj się do GroqCloud, wybierz projekt, kliknij **Create API Key**, nadaj kluczowi nazwę i skopiuj go. Wróć do EduHub, wklej go, kliknij **Zapisz klucz**, a następnie **Test połączenia**.
+
+- Panel kluczy: https://console.groq.com/keys
+- Instrukcja dostawcy: https://console.groq.com/docs/quickstart
+- Klucz pozostaje w localStorage urządzenia; nigdy nie dodawaj go do publicznego repozytorium. Importowane aplikacje działają na tym samym originie i mogą uzyskać do niego dostęp.
