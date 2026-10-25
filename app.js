@@ -48,7 +48,55 @@
     if(selectedSubject===null){$('viewHeading').textContent=gradeLabel(selectedGrade)+' — przedmioty';for(const subject of subjects){const count=inGrade.filter(a=>normalizedApp(a).subject===subject).length;const b=el('button','app-card category-card');b.type='button';b.append(el('div','card-icon',iconFor(subject)),el('h3','app-name',subject),el('div','category-count',count+(count===1?' aplikacja':' aplikacje')));b.onclick=()=>{selectedSubject=subject;renderLibrary();};wrap.append(b);}renderBreadcrumbs(grades);return;}
     $('viewHeading').textContent=selectedSubject+' — '+gradeLabel(selectedGrade);for(const app of inGrade.filter(a=>normalizedApp(a).subject===selectedSubject))renderAppCard(wrap,app);renderBreadcrumbs(grades);
   }
-  function renderAppCard(container,app){const a=normalizedApp(app);const card=el('article','app-card');const top=el('div','card-top');const icon=el('div','card-icon',a.icon||iconFor(a.subject));const detail=el('div');detail.append(el('h3','app-name',a.name),el('div','app-meta',formatBytes(a.byteSize||new Blob([a.html]).size)+' · '+shortDate(a.updatedAt)));top.append(icon,detail);const label=el('span','category-tag',gradeLabel(a.grade)+' · '+a.subject);const description=el('div','card-description','Zapisana lokalnie. Wyniki pozostaną na urządzeniu przy aktualizacji pliku.');const actions=el('div','card-actions');const launch=el('button','btn btn-primary btn-sm open-app','▶ Uruchom');launch.onclick=()=>launchApp(a.id);const update=el('button','icon-btn','↻');update.title='Aktualizuj plik HTML';update.setAttribute('aria-label','Aktualizuj '+a.name);update.onclick=()=>chooseReplacement(a);const edit=el('button','icon-btn','✎');edit.title='Zmień klasę, przedmiot lub nazwę';edit.setAttribute('aria-label','Edytuj '+a.name);edit.onclick=()=>editMetadata(a);const del=el('button','icon-btn','×');del.title='Usuń aplikację';del.setAttribute('aria-label','Usuń '+a.name);del.onclick=async()=>{if(!confirm('Usunąć „'+a.name+'” z biblioteki? Historia wyników nie będzie automatycznie usunięta.'))return;await removeApp(a.id);await refresh();toast('Usunięto aplikację.');};actions.append(launch,update,edit,del);card.append(top,label,description,actions);container.append(card);}
+  function renderAppCard(container,app){const a=normalizedApp(app);const card=el('article','app-card');const top=el('div','card-top');const icon=el('div','card-icon',a.icon||iconFor(a.subject));const detail=el('div');detail.append(el('h3','app-name',a.name),el('div','app-meta',formatBytes(a.byteSize||new Blob([a.html]).size)+' · '+shortDate(a.updatedAt)));top.append(icon,detail);const label=el('span','category-tag',gradeLabel(a.grade)+' · '+a.subject);const description=el('div','card-description','Zapisana lokalnie. Wyniki pozostaną na urządzeniu przy aktualizacji pliku.');const actions=el('div','card-actions');const launch=el('button','btn btn-primary btn-sm open-app','▶ Uruchom');launch.onclick=()=>launchApp(a.id);const update=el('button','icon-btn','↻');update.title='Aktualizuj plik HTML';update.setAttribute('aria-label','Aktualizuj '+a.name);update.onclick=()=>chooseReplacement(a);const edit=el('button','icon-btn','✎');edit.title='Zmień klasę, przedmiot lub nazwę';edit.setAttribute('aria-label','Edytuj '+a.name);edit.onclick=()=>editMetadata(a);const del=el('button','icon-btn','×');del.title='Usuń aplikację';del.setAttribute('aria-label','Usuń '+a.name);del.onclick=async()=>{if(!confirm('Usunąć „'+a.name+'” z biblioteki? Historia wyników nie będzie automatycznie usunięta.'))return;await removeApp(a.id);await refresh();toast('Usunięto aplikację.');};if(a.subject==='Język angielski'){const bridge=el('button','btn btn-outline btn-sm','🔑 Podłącz AI EduHub');bridge.title='Usuń stary klucz i podłącz wspólny Groq';bridge.onclick=()=>upgradeEnglish(a);actions.append(bridge);}actions.append(launch,update,edit,del);card.append(top,label,description,actions);container.append(card);}
+  // Aktualizacja starszej aplikacji angielskiego bez dostępu do jej pierwotnego projektu.
+  // Zmienia tylko metadane i sposób autoryzacji zapytań do Groq, nie dotyka pytań ani localStorage aplikacji.
+  function migrateLegacyEnglish(html){
+    if(typeof html!=='string'||!/<html[\s>]|<!doctype\s+html/i.test(html))throw new Error('To nie jest pełny plik HTML.');
+    if(html.includes('EDUHUB_GROQ_BRIDGE_V1'))return {html,removed:0,already:true};
+    const found=html.match(/gsk_[A-Za-z0-9_-]{18,}/g)||[];
+    let output=html.replace(/gsk_[A-Za-z0-9_-]{18,}/g,'gsk_EDUHUB_RUNTIME_PLACEHOLDER');
+    // Dla bezpieczeństwa nie publikujemy starego klucza, nawet gdy pozostałby w logice aplikacji.
+    output=output.replace(/<meta\s+name=["']eduhub:(?:class|subject|name)["'][^>]*>/gi,'');
+    const meta='<meta name="eduhub:class" content="4">\n<meta name="eduhub:subject" content="Język angielski">\n<meta name="eduhub:name" content="Together 4 – Rozdział 1">\n';
+    const bridge=`<script>
+/* EDUHUB_GROQ_BRIDGE_V1: przechwytywanie autoryzacji wyłącznie do Groq */
+(() => {
+  'use strict';
+  const originalFetch=window.fetch.bind(window);
+  window.__eduhubGroqKey=() => {try {return localStorage.getItem('eduhub:groq-key')||'';} catch(e) {return '';} };
+  window.fetch=function(input,init) {
+    let url='';
+    try {url=typeof input==='string'?input:(input instanceof URL?input.href:input?.url||'');}catch(e){}
+    if(!url.startsWith('https://api.groq.com/'))return originalFetch(input,init);
+    const key=window.__eduhubGroqKey();
+    if(!key)return Promise.reject(new Error('Brak klucza Groq – otwórz EduHub i wpisz go w ustawieniach 🔑.'));
+    const headers=new Headers(init?.headers||(input instanceof Request?input.headers:undefined));
+    headers.set('Authorization','Bearer '+key);
+    return originalFetch(input,{...(init||{}),headers});
+  };
+})();
+</script>\n`;
+    if(/<head\b[^>]*>/i.test(output))output=output.replace(/<head\b[^>]*>/i,match=>match+'\n'+meta+bridge);
+    else output=output.replace(/<html\b[^>]*>/i,match=>match+'\n<head>'+meta+bridge+'</head>');
+    if(!output.includes('EDUHUB_GROQ_BRIDGE_V1'))throw new Error('Nie znaleziono znacznika <head> ani <html>.');
+    return {html:output,removed:found.length,already:false};
+  }
+  function downloadLocalHtml(text,filename){
+    const url=URL.createObjectURL(new Blob([text],{type:'text/html;charset=utf-8'}));
+    const a=el('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  }
+  function upgradeEnglish(app){
+    const a=normalizedApp(app),root=el('div');
+    root.append(el('p','hint','Dostosujemy Angielski do EduHub. Zostaną wszystkie pytania, wyniki i dotychczasowa aplikacja. Usuniemy klucz zaszyty w pliku, a zapytania do Groq będą korzystać ze wspólnego klucza EduHub.'));
+    let result;
+    try{result=migrateLegacyEnglish(a.html);}catch(e){toast(e.message);return;}
+    const notice=el('p','security-note',result.already?'Ta aplikacja została już dostosowana do wspólnego klucza.':result.removed?'Wykryto zapisany w pliku klucz Groq. Zostanie zastąpiony bezpiecznym odwołaniem do EduHub.':'Nie znaleziono klucza Groq w pliku. Dodamy połączenie z EduHub, ale jeśli ta starsza wersja nie obsługiwała oceny AI, sama aktualizacja jej nie doda.');root.append(notice);
+    const actions=el('div','form-actions');const upgrade=el('button','btn btn-primary',result.already?'Zapisz metadane':'Zaktualizuj angielski');
+    upgrade.onclick=async()=>{upgrade.disabled=true;try{const updated={...app,html:result.html,grade:'4',subject:'Język angielski',name:'Together 4 – Rozdział 1',icon:'🇬🇧',byteSize:new Blob([result.html]).size,updatedAt:Date.now()};await saveApp(updated);selectedGrade='4';selectedSubject='Język angielski';$('dialog').close();await refresh();toast('Angielski dostosowany do EduHub.');}catch(e){toast('Błąd aktualizacji: '+e.message);}finally{upgrade.disabled=false;}};
+    const saveFile=el('button','btn btn-outline','Pobierz nowy HTML');saveFile.onclick=()=>{downloadLocalHtml(result.html,'kl4__angielski__Together_4_Rozdzial_1_EduHub.html');toast('Pobrano nową wersję HTML.');};
+    const cancel=el('button','btn btn-outline','Anuluj');cancel.onclick=()=>$('dialog').close();actions.append(upgrade,saveFile,cancel);root.append(actions);showDialog('🇬🇧 Nowy Angielski dla EduHub',root);
+  }
   function chooseFile(){if(!trusted()){toast('Uruchom przez HTTPS.');return;}$('fileInput').click();}
   function metaContent(doc,names){for(const name of names){const value=[...doc.querySelectorAll('meta[name]')].find(e=>e.getAttribute('name')?.toLocaleLowerCase('pl')===name.toLocaleLowerCase('pl'))?.getAttribute('content');if(tidy(value))return tidy(value);}return '';}
   function filenameParts(filename){const base=filename.replace(/\.html?$/i,'');const chunks=base.split('__');if(chunks.length>=3&&/^kl(?:asa)?[ ._-]*[1-8][a-z]?$/i.test(chunks[0]))return{grade:normGrade(chunks[0]),subject:subjectName(chunks[1].replaceAll('_',' ')),name:tidy(chunks.slice(2).join(' ').replaceAll('_',' '))};return null;}
