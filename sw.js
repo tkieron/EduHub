@@ -1,5 +1,5 @@
 /* EduHub v0.4: statyczna powłoka oraz lokalne aplikacje z IndexedDB */
-const CACHE='eduhub-shell-0.4';
+const CACHE='eduhub-shell-0.4.1';
 const SHELL=['./','./index.html','./style.css','./app.js','./groq-pomoc.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png'];
 const DB_NAME='eduhub-v1', DB_VERSION=1;
 function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('apps'))req.result.createObjectStore('apps',{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
