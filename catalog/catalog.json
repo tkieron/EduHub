@@ -36,8 +36,8 @@
       "icon": "🚀",
       "description": "Kartkówka i trening: liczby wielocyfrowe, współrzędne oraz rysowanie osi liczbowej. Rozpoznawanie liczby wypowiedzianej głosem.",
       "html": "catalog/apps/misja-liczby-i-os/1.1.0/index.html",
-      "sha256": "622cd0a53c1636b3682425e9e8918369c5e1f445de630df4c61ea418876424a0",
-      "sizeBytes": 59049
+      "sha256": "1b474ba2630730ba183810088d4bd5a978192f42031899d70535008fbe510cb3",
+      "sizeBytes": 59048
     }
   ]
 }
