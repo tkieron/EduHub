@@ -10,7 +10,7 @@
   const formatBytes=n=>n>1048576?(n/1048576).toFixed(2)+' MB':Math.max(1,Math.round(n/1024))+' KB';
   const shortDate=n=>new Date(n).toLocaleDateString('pl-PL',{day:'numeric',month:'short',year:'numeric'});
   let currentApps=[],selectedGrade=null,selectedSubject=null,recognition=null,toastTimer=null;
-  let showCatalogView=false,publicCatalog=null,catalogIsLoading=false,catalogGrade='all',catalogSubject='all',catalogError='';
+  let showCatalogView=false,publicCatalog=null,catalogIsLoading=false,catalogGrade='all',catalogSubject='all',catalogError='',catalogInstalledOpen=false;
   const CATALOG_URL='./catalog/catalog.json';
   const gradeLabel=g=>g==='Bez klasy'?'Bez klasy':/^\d+[a-z]?$/i.test(g)?'Klasa '+g:g;
   const tidy=v=>String(v??'').trim().replace(/\s+/g,' ').slice(0,80);
@@ -177,7 +177,7 @@
     catch(err){catalogError='Nie udało się odczytać katalogu: '+err.message;if(showCatalogView)renderCatalog();if(!quiet)toast(catalogError);}
     finally{catalogIsLoading=false;if(showCatalogView)renderCatalog();}
   }
-  function catalogToggle(open){showCatalogView=open;if(open&&!publicCatalog&&!catalogIsLoading)fetchCatalog({quiet:true});renderLibrary();}
+  function catalogToggle(open){if(open&&!showCatalogView)catalogInstalledOpen=false;showCatalogView=open;if(open&&!publicCatalog&&!catalogIsLoading)fetchCatalog({quiet:true});renderLibrary();}
   function renderCatalog(){
     const node=$('appGrid');node.replaceChildren();$('viewHeading').textContent='📚 Katalog aplikacji';$('appCount').textContent='Pobierz nową aplikację lub zaktualizuj już zainstalowaną.';
     const crumbs=$('breadcrumbs');crumbs.hidden=false;crumbs.replaceChildren();const back=el('button','crumb','← Moja biblioteka');back.onclick=()=>catalogToggle(false);crumbs.append(back);
@@ -196,7 +196,14 @@
     if(availableSubjects.length>1)selectFilter('Przedmiot','Wszystkie przedmioty',availableSubjects,catalogSubject,v=>{catalogSubject=v;renderCatalog();});
     node.append(toolbar);
     const visible=publicCatalog.apps.filter(e=>(catalogGrade==='all'||normGrade(e.grade)===catalogGrade)&&(catalogSubject==='all'||subjectName(e.subject)===catalogSubject));
+    const toInstall=[],installedEntries=[];
     for(const entry of visible){
+      const local=installedFor(entry);
+      if(!local||compareAppVersions(entry.version,normalizedApp(local).version)>0)toInstall.push(entry);
+      else installedEntries.push(entry);
+    }
+    $('appCount').textContent='Nowe aplikacje i aktualizacje na górze. Zainstalowane znajdziesz po rozwinięciu sekcji na dole.';
+    function catalogCard(entry){
       const installed=installedFor(entry),installedV=installed?normalizedApp(installed).version:null;
       const difference=installed?compareAppVersions(entry.version,installedV):1;
       const card=el('article','app-card catalog-card');const top=el('div','card-top');const detail=el('div');detail.append(el('h3','app-name',entry.name),el('div','version-tag','v'+entry.version));top.append(el('div','card-icon',entry.icon||iconFor(entry.subject)),detail);
@@ -204,7 +211,20 @@
       const status=el('div','catalog-status'+(installed&&difference>0?' update':''),installed?(difference>0?'Nowa wersja: v'+installedV+' → v'+entry.version:difference===0?'Już zainstalowana v'+installedV:'Masz nowszą wersję v'+installedV):'Nie jest jeszcze zainstalowana');card.append(status);
       const actions=el('div','card-actions');const button=el('button','btn '+(installed&&difference<=0?'btn-outline':'btn-primary')+' btn-sm',!installed?'⬇ Zainstaluj':difference>0?'⬇ Aktualizuj': '▶ Otwórz');
       if(installed&&difference<=0)button.onclick=()=>launchApp(installed.id);else button.onclick=()=>installFromCatalog(entry,button);
-      actions.append(button);card.append(actions);node.append(card);
+      actions.append(button);card.append(actions);return card;
+    }
+    node.append(el('h3','catalog-group-title','Nowe i aktualizacje ('+toInstall.length+')'));
+    if(toInstall.length)for(const entry of toInstall)node.append(catalogCard(entry));
+    else node.append(el('div','catalog-empty','Wszystko aktualne! Nowe aplikacje i aktualizacje pojawią się tutaj.'));
+    if(installedEntries.length){
+      const details=el('details','catalog-installed-section');
+      details.open=catalogInstalledOpen;
+      details.addEventListener('toggle',()=>{if(details.isConnected)catalogInstalledOpen=details.open;});
+      const summary=el('summary','catalog-installed-summary','✓ Zainstalowane ('+installedEntries.length+')');
+      const grid=el('div','app-grid catalog-installed-grid');
+      for(const entry of installedEntries)grid.append(catalogCard(entry));
+      details.append(summary,grid);
+      node.append(details);
     }
   }
   async function installFromCatalog(entry,button=null){
