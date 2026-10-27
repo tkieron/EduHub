@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "tkieron/EduHub",
-  "updatedAt": "2026-10-25",
+  "updatedAt": "2026-10-27",
   "apps": [
     {
       "id": "okiem-badacza",
@@ -26,6 +26,18 @@
       "html": "catalog/apps/english-quest-together4-unit1/1.6/index.html",
       "sha256": "4e5705b02968062ad2e57fb38c2e10281601ed3154f0b16909654fe777bd285b",
       "sizeBytes": 89334
+    },
+    {
+      "id": "misja-liczby-i-os",
+      "name": "Misja Liczby i Oś",
+      "version": "1.1.0",
+      "grade": "4",
+      "subject": "Matematyka",
+      "icon": "🚀",
+      "description": "Kartkówka i trening: liczby wielocyfrowe, współrzędne oraz rysowanie osi liczbowej. Rozpoznawanie liczby wypowiedzianej głosem.",
+      "html": "catalog/apps/misja-liczby-i-os/1.1.0/index.html",
+      "sha256": "622cd0a53c1636b3682425e9e8918369c5e1f445de630df4c61ea418876424a0",
+      "sizeBytes": 59049
     }
   ]
 }
