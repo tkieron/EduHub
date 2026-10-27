@@ -48,3 +48,16 @@ dialog{border:0;border-radius:20px;padding:0;max-width:min(95vw,650px);width:100
 .catalog-toolbar select{min-height:42px;border:1px solid #bdd7c3;border-radius:11px;padding:9px 12px;background:white;color:#204b35}
 .update-available{border-left:4px solid #dda343;background:#fff8e8;border-radius:12px;padding:13px;color:#79561b;margin-top:8px;font-size:.87rem;line-height:1.4}
 @media(max-width:650px){.catalog-toolbar select,.catalog-toolbar .btn{flex:1 1 100%}}
+
+/* EduHub v0.8: instalacje schowane pod rozwijanym nagłówkiem katalogu */
+.catalog-group-title{grid-column:1/-1;margin:11px 0 0;color:#194936;font-size:1.06rem;line-height:1.4}
+.catalog-empty{grid-column:1/-1;padding:24px 18px;border:1px dashed #c6ddcd;border-radius:17px;background:#f8fcf8;color:#496c58;line-height:1.5}
+.catalog-installed-section{grid-column:1/-1;min-width:0;border:1px solid #d2e5d7;border-radius:18px;background:#eef6ef;overflow:hidden}
+.catalog-installed-summary{display:flex;align-items:center;gap:10px;padding:18px;cursor:pointer;color:#235c41;font-weight:800;list-style:none;min-height:58px}
+.catalog-installed-summary::-webkit-details-marker{display:none}
+.catalog-installed-summary::before{content:'▸';display:inline-block;transition:transform .15s ease;font-size:1.1rem}
+.catalog-installed-summary::after{content:'Pokaż';margin-left:auto;font-size:.83rem;font-weight:700;color:#406d53}
+.catalog-installed-section[open] .catalog-installed-summary::before{transform:rotate(90deg)}
+.catalog-installed-section[open] .catalog-installed-summary::after{content:'Ukryj'}
+.catalog-installed-summary:focus-visible{outline:3px solid #307d52;outline-offset:-4px;border-radius:16px}
+.catalog-installed-grid{padding:0 16px 16px}
