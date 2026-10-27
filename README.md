@@ -1,4 +1,4 @@
-# EduHub v0.7
+# EduHub v0.8
 
 Przeglądarkowa biblioteka szkolnych, jednoplikowych aplikacji HTML. Hosting na GitHub Pages udostępnia wyłącznie samą powłokę PWA; zaimportowane HTML-e, postępy i klucz Groq są przechowywane lokalnie w urządzeniu użytkownika.
 
@@ -97,3 +97,11 @@ Od v0.7 każdy użytkownik widzi publiczne aplikacje w zakładce **📚 Katalog 
 Stałe `id` w JSON identyfikuje aplikację między wydaniami. EduHub dopasowuje także ręcznie wcześniej zainstalowane pliki po klasie, przedmiocie i nazwie. Przed instalacją porównuje SHA-256, wersję i metadane. Przy aktualizacji zachowuje lokalny identyfikator i odkłada poprzedni HTML do możliwości powrotu. Postępy zapisane przez aplikację w localStorage pozostają nienaruszone.
 
 **Bezpieczeństwo**: instaluj tylko zaufany, publicznie audytowalny kod. Zaimportowane aplikacje uruchamiają się na tej samej domenie i mają techniczny dostęp do wspólnego klucza Groq; jest to kompromis projektu bez backendu. SHA-256 chroni przed przypadkową niezgodnością pliku z manifestem, ale nie gwarantuje uczciwości autora katalogu. 
+
+## EduHub v0.8 — porządek w katalogu
+
+W **📚 Katalogu aplikacji** najpierw wyświetlane są wyłącznie aplikacje, których jeszcze nie zainstalowano, oraz **dostępne aktualizacje** już zainstalowanych aplikacji. Aktualizacje pozostają na widoku, ponieważ wymagają działania rodzica lub ucznia.
+
+Aplikacje już zainstalowane w aktualnej albo nowszej wersji są w domyślnie zwiniętej sekcji **✓ Zainstalowane (liczba)**. Sekcję można rozwinąć, aby wyświetlić karty i uruchomić aplikacje. Licznik uwzględnia aktualnie wybraną klasę i przedmiot. Zmiana filtra albo odświeżenie katalogu zachowuje bieżący stan rozwinięcia; wejście do katalogu od nowa przywraca zwinięcie. Po instalacji aplikacja znika z listy „Nowe i aktualizacje” i trafia do zainstalowanych.
+
+Zmieniono również wersję cache Service Workera na `eduhub-shell-0.8`, aby zainstalowana aplikacja PWA pobrała nowy interfejs po aktualizacji.
