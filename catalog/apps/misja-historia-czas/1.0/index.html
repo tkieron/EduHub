@@ -28,7 +28,7 @@ function makeCentury(){
  const vals=[c,c-1,c+1,c+2].filter(x=>x>0&&x<40);
  return choice('Który to wiek? '+fmt(y,e),vals.map(roman),roman(c),'Wiek '+roman(c)+' obejmuje lata '+fmt((c-1)*100+1,e)+'–'+fmt(c*100,e)+'. Rok kończący się na 00 należy do kończącego się wieku.', 'Obliczanie wieku');
 }
-function makeHalf(){const c=rnd(5,21),first=Math.random()<.5,y=(c-1)*100+(first?rnd(1,50):rnd(51,100));return choice('Która połowa wieku? '+y+' r. n.e.', ['I połowa','II połowa'],' '+(first?'I':'II')+' połowa'.trim(),'I połowa: lata '+((c-1)*100+1)+'–'+((c-1)*100+50)+', II połowa: '+((c-1)*100+51)+'–'+(c*100)+'.','Połowy wieków')}
+function makeHalf(){const c=rnd(5,21),first=Math.random()<.5,y=(c-1)*100+(first?rnd(1,50):rnd(51,100));return choice('Która połowa wieku? '+y+' r. n.e.', ['I połowa','II połowa'],(first?'I':'II')+' połowa','I połowa: lata '+((c-1)*100+1)+'–'+((c-1)*100+50)+', II połowa: '+((c-1)*100+51)+'–'+(c*100)+'.','Połowy wieków')}
 function makeEpoch(){const i=rnd(0,4),p=epochs[i];return choice('Która epoka pasuje do opisu: „'+p[1]+'”?',epochs.map(x=>x[0]),p[0],'Epoki w kolejności: '+epochs.map(x=>x[0]).join(' → ')+'.','Epoki historyczne')}
 function makeConcept(){const p=pick(concepts);return choice('Co oznacza: '+p[0]+'?',concepts.map(x=>x[1]),p[1],p[0]+' — '+p[1]+'.','Pojęcia i pomiar czasu')}
 function makeTime(){const p=pick([['zegar słoneczny','cień wskazówki na tarczy'],['klepsydra','przesypujący się piasek'],['zegar wodny','przepływ wody'],['kalendarz','następowanie dni, miesięcy i lat']]);return choice('Jak działa '+p[0]+'?', ['cień wskazówki na tarczy','przesypujący się piasek','przepływ wody','następowanie dni, miesięcy i lat'],p[1],p[0]+': '+p[1]+'.','Mierzenie czasu')}
