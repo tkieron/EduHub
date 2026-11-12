@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "tkieron/EduHub",
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-12",
   "apps": [
     {
       "id": "okiem-badacza",
@@ -50,6 +50,18 @@
       "html": "catalog/apps/misja-historia-czas/1.0/index.html",
       "sha256": "c7781083ffe045057966beb9e62fcab407d9bc5e7f4b8e664f11bdfcf78b90d2",
       "sizeBytes": 13595
+    },
+    {
+      "id": "przebrala-sie-miarka",
+      "name": "Przebrała się miarka",
+      "version": "1.6",
+      "grade": "4",
+      "subject": "Matematyka",
+      "icon": "📏",
+      "description": "Gra matematyczna: jednostki długości i masy, porównywanie, sortowanie Drag & Drop, misje, kartkówka i dogrywka błędów.",
+      "html": "catalog/apps/przebrala-sie-miarka/1.6/index.html",
+      "sha256": "609b4d05a8e91961009b451594e39a97028fe1b69391a90c2b48b00cd9b19e91",
+      "sizeBytes": 47680
     }
   ]
 }
