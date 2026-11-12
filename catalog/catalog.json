@@ -60,8 +60,8 @@
       "icon": "📏",
       "description": "Gra matematyczna: jednostki długości i masy, porównywanie, sortowanie Drag & Drop, misje, kartkówka i dogrywka błędów.",
       "html": "catalog/apps/przebrala-sie-miarka/1.6/index.html",
-      "sha256": "609b4d05a8e91961009b451594e39a97028fe1b69391a90c2b48b00cd9b19e91",
-      "sizeBytes": 47680
+      "sha256": "145b3638ade6ac10341d1f7a39e2cc17d057918de7bdfc8afea7e034b5b2a3f6",
+      "sizeBytes": 47679
     }
   ]
 }
