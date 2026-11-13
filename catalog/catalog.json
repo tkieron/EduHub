@@ -66,14 +66,14 @@
     {
       "id": "tajemnica-siedmiu-przypadkow",
       "name": "Tajemnica Siedmiu Przypadków",
-      "version": "1.4",
+      "version": "1.5",
       "grade": "4",
       "subject": "Język polski",
       "icon": "🧙",
-      "description": "Gra o odmianie rzeczowników: siedem przypadków, dopasowywanie pytań, tablica odmiany, poprawki i dogrywka błędów.",
-      "html": "catalog/apps/tajemnica-siedmiu-przypadkow/1.4/index.html",
-      "sha256": "900d8dc6a90ddde556a9f0e5f8a2102bc22bbd673a8b2cddfd9aadc33f8e50dc",
-      "sizeBytes": 30665
+      "description": "Gra o odmianie rzeczowników: siedem przypadków, pełna odmiana, pary, poprawianie czerwonych odpowiedzi i żółte rozwiązania w każdym zadaniu oraz dogrywka błędów.",
+      "html": "catalog/apps/tajemnica-siedmiu-przypadkow/1.5/index.html",
+      "sha256": "a32f65bab524e41291f83a4bb4ffe3beb0d8829d0f814e9e4d764ef1af1cb08a",
+      "sizeBytes": 32464
     }
   ]
 }
