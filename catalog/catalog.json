@@ -72,8 +72,8 @@
       "icon": "🧙",
       "description": "Gra o odmianie rzeczowników: siedem przypadków, dopasowywanie pytań, tablica odmiany, poprawki i dogrywka błędów.",
       "html": "catalog/apps/tajemnica-siedmiu-przypadkow/1.4/index.html",
-      "sha256": "8273e47305a1d2631ebcdeb31b7978182774a696f465e33a72192e79e5e826f9",
-      "sizeBytes": 30666
+      "sha256": "900d8dc6a90ddde556a9f0e5f8a2102bc22bbd673a8b2cddfd9aadc33f8e50dc",
+      "sizeBytes": 30665
     }
   ]
 }
