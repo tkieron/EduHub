@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "tkieron/EduHub",
-  "updatedAt": "2026-11-12",
+  "updatedAt": "2026-11-13",
   "apps": [
     {
       "id": "okiem-badacza",
@@ -62,6 +62,18 @@
       "html": "catalog/apps/przebrala-sie-miarka/1.6/index.html",
       "sha256": "145b3638ade6ac10341d1f7a39e2cc17d057918de7bdfc8afea7e034b5b2a3f6",
       "sizeBytes": 47679
+    },
+    {
+      "id": "tajemnica-siedmiu-przypadkow",
+      "name": "Tajemnica Siedmiu Przypadków",
+      "version": "1.4",
+      "grade": "4",
+      "subject": "Język polski",
+      "icon": "🧙",
+      "description": "Gra o odmianie rzeczowników: siedem przypadków, dopasowywanie pytań, tablica odmiany, poprawki i dogrywka błędów.",
+      "html": "catalog/apps/tajemnica-siedmiu-przypadkow/1.4/index.html",
+      "sha256": "8273e47305a1d2631ebcdeb31b7978182774a696f465e33a72192e79e5e826f9",
+      "sizeBytes": 30666
     }
   ]
 }
