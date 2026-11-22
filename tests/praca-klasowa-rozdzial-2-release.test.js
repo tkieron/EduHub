@@ -5,8 +5,8 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 const releasePaths = [
-  join(__dirname, '../catalog/apps/praca-klasowa-rozdzial-2/1.0.0/index.html'),
-  join(__dirname, '../deliverables/Praca_Klasowa_Rozdzial_2_v1.0.0.html'),
+  join(__dirname, '../catalog/apps/praca-klasowa-rozdzial-2/1.1.0/index.html'),
+  join(__dirname, '../deliverables/Praca_Klasowa_Rozdzial_2_v1.1.0.html'),
 ];
 const releasePath = releasePaths.find(path => existsSync(path));
 assert.ok(releasePath, `Release HTML not found at ${releasePaths.join(' or ')}`);
@@ -27,7 +27,9 @@ assert.ok(core, 'The inline script must expose LearningCore in a browser-like co
 
 const quotas = { voice: 5, noun: 4, case: 7, capital: 5, quote: 4 };
 const topics = Object.keys(quotas);
-const types = ['choice', 'fields', 'match', 'multi'];
+const types = ['choice', 'fields', 'match', 'multi', 'quotes', 'wordcase'];
+const booleanSelectionTypes = ['multi', 'wordcase'];
+const optionalSlotTypes = [...booleanSelectionTypes, 'quotes'];
 const nonEmptyText = value => typeof value === 'string' && value.trim().length > 0;
 
 function assertOptions(options, location) {
@@ -43,6 +45,8 @@ function canonicalValues(question) {
   switch (question.type) {
     case 'choice': return [question.answer];
     case 'multi': return question.options.map((_, index) => question.answers.includes(index));
+    case 'wordcase': return question.tokens.map((_, index) => question.answers.includes(index));
+    case 'quotes': return Array.from({ length: question.tokens.length + 1 }, (_, gap) => question.answers[gap] ?? '');
     case 'fields': return question.fields.map(field => field.answers[0]);
     case 'match': return question.rows.map(row => row.answer);
     default: throw new Error(`Unknown question type: ${question.type}`);
@@ -59,9 +63,14 @@ function oneWrongValue(question, correctValues) {
       values[0] = (question.answer + 1) % question.options.length;
       break;
     case 'multi':
+    case 'wordcase':
       index = correctValues.indexOf(false);
       if (index < 0) index = 0;
       values[index] = !correctValues[index];
+      break;
+    case 'quotes':
+      index = correctValues.findIndex(value => value === '„' || value === '”');
+      values[index] = correctValues[index] === '„' ? '”' : '„';
       break;
     case 'fields': {
       const field = question.fields[0];
@@ -92,10 +101,25 @@ test('the embedded bank contains unique questions with valid answer data across 
     if (type === 'choice' || type === 'multi') assertOptions(question.options, id);
     if (type === 'choice') assertOptionIndex(question.answer, question.options, id);
 
-    if (type === 'multi') {
-      assert.ok(Array.isArray(question.answers) && question.answers.length > 0, `${id}: no multiple-selection answers`);
+    if (type === 'wordcase' || type === 'quotes') {
+      assert.ok(Array.isArray(question.tokens) && question.tokens.length > 0 && question.tokens.every(nonEmptyText), `${id}: missing text tokens`);
+    }
+
+    if (booleanSelectionTypes.includes(type)) {
+      const slots = type === 'multi' ? question.options : question.tokens;
+      assert.ok(Array.isArray(question.answers) && question.answers.length > 0, `${id}: no selected answers`);
       assert.equal(new Set(question.answers).size, question.answers.length, `${id}: duplicate answer indices`);
-      for (const index of question.answers) assertOptionIndex(index, question.options, id);
+      for (const index of question.answers) assertOptionIndex(index, slots, id);
+    }
+
+    if (type === 'quotes') {
+      assert.ok(question.answers && typeof question.answers === 'object' && !Array.isArray(question.answers), `${id}: expected a quotation gap map`);
+      const gaps = Object.entries(question.answers);
+      assert.ok(gaps.length > 0, `${id}: no quotation gaps with answers`);
+      for (const [gap, quote] of gaps) {
+        assert.ok(/^(0|[1-9]\d*)$/u.test(gap) && Number(gap) <= question.tokens.length, `${id}: quotation gap ${gap} is out of bounds`);
+        assert.ok(quote === '„' || quote === '”', `${id}: unexpected quotation mark in gap ${gap}`);
+      }
     }
 
     if (type === 'fields') {
@@ -124,6 +148,7 @@ test('the embedded bank contains unique questions with valid answer data across 
 test('every embedded canonical answer resolves at two points exactly once', () => {
   for (const question of bank) {
     const values = canonicalValues(question);
+    assert.deepEqual(Array.from(core.solutionValues(question)), values, question.id);
     const attempt = { ...core.createAttempt(question), values };
     const resolved = core.check(question, attempt);
     assert.equal(resolved.done, true, question.id);
@@ -148,7 +173,7 @@ test('correcting one missed slot leaves the other answers green and awards one p
 
     const editing = core.correct(question, missed);
     const expectedValues = [...values];
-    expectedValues[index] = question.type === 'multi' ? false : '';
+    expectedValues[index] = booleanSelectionTypes.includes(question.type) ? false : '';
     assert.deepEqual(Array.from(editing.values), expectedValues, question.id);
     assert.deepEqual(Array.from(editing.marks), values.map((_, slot) => slot === index ? 'neutral' : 'green'), question.id);
     const resolved = core.check(question, { ...editing, values: canonical });
@@ -179,7 +204,7 @@ test('blank and partially blank answers do not count as graded attempts', () => 
   for (const question of bank) {
     const attempt = core.createAttempt(question);
     const values = Array.from(attempt.values);
-    if (question.type !== 'multi') {
+    if (!optionalSlotTypes.includes(question.type)) {
       values.splice(0, values.length, ...canonicalValues(question));
       values[0] = '  ';
     }

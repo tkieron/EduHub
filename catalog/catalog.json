@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "repository": "tkieron/EduHub",
-  "updatedAt": "2026-11-21",
+  "updatedAt": "2026-11-22",
   "apps": [
     {
       "id": "okiem-badacza",
@@ -78,14 +78,15 @@
     {
       "id": "praca-klasowa-rozdzial-2",
       "name": "Praca Klasowa - Rozdział 2",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "grade": "4",
       "subject": "Język polski",
       "icon": "🦉",
       "description": "100 zadań: narrator, podmiot mówiący, rzeczowniki i przypadki, wielka litera, cudzysłów i kursywa. Trening, wyprawa, próbna klasówka oraz dogrywka błędów.",
-      "html": "catalog/apps/praca-klasowa-rozdzial-2/1.0.0/index.html",
-      "sizeBytes": 126071,
-      "sha256": "d559600c0cafad0e55e0c824a839e3af243989206830a92e289ae35feb674e39"
+      "html": "catalog/apps/praca-klasowa-rozdzial-2/1.1.0/index.html",
+      "sizeBytes": 135963,
+      "sha256": "1b3a74b85a770516a004d225616180fde2594bb929cdd7f8518ca382a6aa2ab6"
     }
   ]
 }
+
