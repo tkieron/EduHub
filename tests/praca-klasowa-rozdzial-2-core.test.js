@@ -5,8 +5,8 @@ const { join } = require('node:path');
 const { compileFunction } = require('node:vm');
 
 const releasePaths = [
-  join(__dirname, '../catalog/apps/praca-klasowa-rozdzial-2/1.0.0/index.html'),
-  join(__dirname, '../deliverables/Praca_Klasowa_Rozdzial_2_v1.0.0.html'),
+  join(__dirname, '../catalog/apps/praca-klasowa-rozdzial-2/1.1.0/index.html'),
+  join(__dirname, '../deliverables/Praca_Klasowa_Rozdzial_2_v1.1.0.html'),
 ];
 const releasePath = releasePaths.find(path => existsSync(path));
 assert.ok(releasePath, `Release HTML not found at ${releasePaths.join(' or ')}`);
@@ -35,6 +35,28 @@ const match = {
     { label: 'komu? czemu?', answer: 'celownik' },
   ],
 };
+const wordcase = {
+  id: 'wordcase', topic: 'capital', type: 'wordcase',
+  tokens: ['w', 'sobotę', 'zosia', 'idzie', 'do', 'łodzi', '.'], answers: [0, 2, 5],
+};
+const quotes = {
+  id: 'quotes', topic: 'quote', type: 'quotes',
+  tokens: ['Halo', '!', 'i', 'Kto', 'tam', '?'], answers: { 0: '„', 2: '”', 3: '„', 6: '”' },
+};
+
+test('solution values supply the complete canonical answer for all question formats', () => {
+  const cases = [
+    [choice, [0]],
+    [multi, [true, false, true, false, true]],
+    [fields, ['Łódź', 'łódzki']],
+    [match, ['dopełniacz', 'celownik']],
+    [wordcase, [true, false, true, false, false, true, false]],
+    [quotes, ['„', '', '”', '„', '', '', '”']],
+  ];
+  for (const [question, expected] of cases) {
+    assert.deepEqual(core.solutionValues(question), expected, question.type);
+  }
+});
 
 test('each format starts with as many neutral slots as the form displays', () => {
   assert.deepEqual(core.initialValues(choice), ['']);
@@ -64,6 +86,80 @@ test('a multiple selection correction keeps correctly selected and deselected sl
   assert.equal(core.check(multi, { ...third, values: [true, false, true, false, true] }).score, 1);
   assert.deepEqual(submitted.values, [true, true, false, false, false]);
   assert.deepEqual(checked.marks, ['green', 'red', 'red', 'green', 'red']);
+});
+
+test('selecting the intended capitalized words on the first try earns two points', () => {
+  const attempt = core.createAttempt(wordcase);
+  assert.deepEqual(attempt.values, [false, false, false, false, false, false, false]);
+  const resolved = core.check(wordcase, { ...attempt, values: [true, false, true, false, false, true, false] });
+  assert.equal(resolved.done, true);
+  assert.equal(resolved.score, 2);
+  assert.deepEqual(resolved.marks, ['green', 'green', 'green', 'green', 'green', 'green', 'green']);
+});
+
+test('a capitalization correction preserves correct selections and clears an extra selection', () => {
+  const values = [true, false, false, true, false, true, false];
+  const missed = core.check(wordcase, { ...core.createAttempt(wordcase), values });
+  assert.deepEqual(missed.marks, ['green', 'green', 'red', 'red', 'green', 'green', 'green']);
+  const editing = core.correct(wordcase, missed);
+  assert.deepEqual(editing.values, [true, false, false, false, false, true, false]);
+  assert.deepEqual(editing.marks, ['green', 'green', 'neutral', 'neutral', 'green', 'green', 'green']);
+  const resolved = core.check(wordcase, { ...editing, values: [true, false, true, false, false, true, false] });
+  assert.equal(resolved.score, 1);
+  assert.equal(resolved.checks, 2);
+});
+
+test('a capitalization reveal marks only the omitted and extra words yellow', () => {
+  const values = [true, false, false, true, false, true, false];
+  const missed = core.check(wordcase, { ...core.createAttempt(wordcase), values });
+  const shown = core.reveal(wordcase, missed);
+  assert.deepEqual(shown.values, [true, false, true, false, false, true, false]);
+  assert.deepEqual(shown.marks, ['green', 'green', 'yellow', 'yellow', 'green', 'green', 'green']);
+  assert.equal(shown.score, 0);
+  assert.equal(shown.revealed, true);
+});
+
+test('two correctly placed quotation pairs include the gaps before the first token and after the last token', () => {
+  const attempt = core.createAttempt(quotes);
+  assert.deepEqual(attempt.values, ['', '', '', '', '', '', '']);
+  const resolved = core.check(quotes, { ...attempt, values: ['„', '', '”', '„', '', '', '”'] });
+  assert.equal(resolved.done, true);
+  assert.equal(resolved.score, 2);
+  assert.deepEqual(resolved.marks, ['green', 'green', 'green', 'green', 'green', 'green', 'green']);
+});
+
+test('quotation correction distinguishes quote orientation and placement beside punctuation', () => {
+  const values = ['„', '”', '', '”', '', '', ''];
+  const missed = core.check(quotes, { ...core.createAttempt(quotes), values });
+  assert.deepEqual(missed.marks, ['green', 'red', 'red', 'red', 'green', 'green', 'red']);
+  const editing = core.correct(quotes, missed);
+  assert.deepEqual(editing.values, ['„', '', '', '', '', '', '']);
+  assert.deepEqual(editing.marks, ['green', 'neutral', 'neutral', 'neutral', 'green', 'green', 'neutral']);
+  const resolved = core.check(quotes, { ...editing, values: ['„', '', '”', '„', '', '', '”'] });
+  assert.equal(resolved.score, 1);
+  assert.equal(resolved.checks, 2);
+});
+
+test('revealing a partial quotation answer leaves correct gaps green and awards zero points', () => {
+  const missed = core.check(quotes, { ...core.createAttempt(quotes), values: ['„', '', '”', '', '”', '', ''] });
+  const shown = core.reveal(quotes, missed);
+  assert.deepEqual(shown.values, ['„', '', '”', '„', '', '', '”']);
+  assert.deepEqual(shown.marks, ['green', 'green', 'green', 'yellow', 'yellow', 'green', 'yellow']);
+  assert.equal(shown.done, true);
+  assert.equal(shown.revealed, true);
+  assert.equal(shown.score, 0);
+  assert.deepEqual(core.check(quotes, shown), shown);
+});
+
+test('a blank capitalization or quotation selection does not count as a graded attempt', () => {
+  for (const question of [wordcase, quotes]) {
+    const attempt = core.createAttempt(question);
+    const result = core.check(question, attempt);
+    assert.ok(result.validation, question.type);
+    assert.equal(result.checks, 0, question.type);
+    assert.equal(result.hadError, false, question.type);
+    assert.deepEqual(result.marks, attempt.marks, question.type);
+  }
 });
 
 test('a repaired incorrect choice earns one point even when the correct index is zero', () => {
